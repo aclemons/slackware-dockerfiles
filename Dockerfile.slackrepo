@@ -3,9 +3,7 @@ FROM $base_image
 
 ARG base_image
 RUN echo "Using base image $base_image"
-RUN git clone --depth 1 https://github.com/aclemons/slackbuilds.org.git -b 14.2_acl
-RUN cp -r slackbuilds.org/system/slackrepo* /tmp
-RUN cd /tmp/slackrepo && . /tmp/slackrepo/slackrepo.info && wget $DOWNLOAD && TAG=_jenkins sh slackrepo.SlackBuild && cd ../slackrepo-hints && . /tmp/slackrepo-hints/slackrepo-hints.info && wget $DOWNLOAD && TAG=_jenkins sh slackrepo-hints.SlackBuild
-RUN installpkg /tmp/slackrepo-*.t?z
-RUN rm -rf /tmp/slackrepo*
-RUN cd /usr/local/bin && wget https://raw.githubusercontent.com/aclemons/slackrepo-jenkins/28b9b80ccbc332b54d7f1010207897d91b23bd88/slackrepo_parse.rb && chmod +x slackrepo_parse.rb
+
+COPY scripts/install_slackrepo.sh /
+RUN bash /install_slackrepo.sh
+RUN rm /install_slackrepo.sh
