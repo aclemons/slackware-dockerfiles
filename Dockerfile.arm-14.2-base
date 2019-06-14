@@ -1,0 +1,4 @@
+FROM scratch
+
+ADD slack-14.2-miniroot_01Jul16.tar.xz /
+COPY /usr/bin/qemu-arm-static /usr/bin
