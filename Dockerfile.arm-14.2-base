@@ -1,4 +1,8 @@
 FROM scratch
 
 ADD slack-14.2-miniroot_01Jul16.tar.xz /
-COPY /usr/bin/qemu-arm-static /usr/bin
+COPY qemu-arm-static /usr/bin
+RUN echo "http://slackware.uk/slackwarearm/slackwarearm-14.2/" >> /etc/slackpkg/mirrors
+COPY diffutils-3.3-arm-2.txz gnupg-1.4.20-arm-1.txz libunistring-0.9.3-arm-2.txz /tmp/
+RUN installpkg /tmp/*.txz
+RUN rm /tmp/*.txz

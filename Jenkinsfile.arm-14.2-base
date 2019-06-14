@@ -24,17 +24,10 @@ node('master') {
     stage('build') {
         checkout scm
 
-        fileOperations([fileDownloadOperation(password: '', targetFileName: '', targetLocation: '', url: 'http://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt.asc', userName: '')])
-        fileOperations([fileDownloadOperation(password: '', targetFileName: '', targetLocation: '', url: 'http://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt', userName: '')])
-
-        sh('gpg --verify slack-14.2-miniroot_details.txt.asc slack-14.2-miniroot_details.txt')
-
-        fileOperations([fileDownloadOperation(password: '', targetFileName: '', targetLocation: '', url: 'http://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_01Jul16.tar.xz', userName: '')])
-
-        sh("sha1sum --check <(sed -n '/miniroot/p' slack-14.2-miniroot_details.txt)")
+        sh("bash scripts/fetch_14.2_arm_files.sh")
 
         ansiColor('xterm') {
-            docker.build(env.DOCKER_IMAGE, "--file Dockerfile.arm-14.2-base--no-cache .")
+            docker.build(env.DOCKER_IMAGE, "--file Dockerfile.arm-14.2-base --no-cache .")
         }
     }
 }
