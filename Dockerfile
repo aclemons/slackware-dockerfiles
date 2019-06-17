@@ -3,7 +3,7 @@ FROM $base_image
 
 ARG base_image
 RUN echo "Using base image $base_image"
-RUN if [ "$base_image" = "vbatts/slackware:current" ] ; then touch /var/lib/slackpkg/current ; fi
+RUN if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] ; then touch /var/lib/slackpkg/current ; fi
 RUN sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 RUN slackpkg -default_answer=yes -batch=on update
 RUN slackpkg -default_answer=yes -batch=on upgrade slackpkg

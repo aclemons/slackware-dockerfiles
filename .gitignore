@@ -1,5 +1,4 @@
 *.asc
 *.txz
-qemu-arm-static
-slack-14.2-miniroot_01Jul16.tar.xz
-slack-14.2-miniroot_details.txt
+qemu-*-static
+slack-*-miniroot*
