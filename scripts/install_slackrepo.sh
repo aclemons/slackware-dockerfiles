@@ -30,14 +30,18 @@ export TAG=_jenkins
   cd slackbuilds.org
 
   cd system/slackrepo
+  # shellcheck disable=SC1091
   . slackrepo.info
 
+  # shellcheck disable=SC2086
   wget $DOWNLOAD
   sh slackrepo.SlackBuild
 
   cd ../slackrepo-hints
+  # shellcheck disable=SC1091
   . slackrepo-hints.info
 
+  # shellcheck disable=SC2086
   wget $DOWNLOAD
   sh slackrepo-hints.SlackBuild
 )
@@ -54,3 +58,15 @@ rm -rf /tmp/SBo
   wget https://raw.githubusercontent.com/aclemons/slackrepo-jenkins/28b9b80ccbc332b54d7f1010207897d91b23bd88/slackrepo_parse.rb
   chmod +x slackrepo_parse.rb
 )
+
+{
+  find /boot -name 'uImage-armv7-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f3-
+  find /boot -name 'vmlinuz-generic-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f3-
+} | sed 's/^/export KERNEL=/' >> /etc/profile
+
+# PRETTY_NAME="Slackware 14.2 arm (post 14.2 -current)"
+if sed -n '/^PRETTY_NAME/p' /etc/os-release | grep post > /dev/null 2>&1 ; then
+  echo "export OPT_REPO=ponce" >> /etc/profile
+else
+  echo "export OPT_REPO=SBo" >> /etc/profile
+fi
