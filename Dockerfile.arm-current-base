@@ -1,6 +1,6 @@
 FROM scratch
 
-ADD slack-current-miniroot_17Jun19.tar.xz /
+ADD slack-current-miniroot_01Jul19.tar.xz /
 COPY qemu-arm-static /usr/bin
 RUN sed -i 's/^\(ftp:\)/#\1/' /etc/slackpkg/mirrors
 RUN echo "http://slackware.uk/slackwarearm/slackwarearm-current/" >> /etc/slackpkg/mirrors
