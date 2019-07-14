@@ -5,5 +5,5 @@ ARG base_image
 RUN echo "Using base image $base_image"
 
 COPY scripts/install_all.sh /
-RUN bash /install_all.sh
+RUN bash /install_all.sh "$base_image"
 RUN rm /install_all.sh
