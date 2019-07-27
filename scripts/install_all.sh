@@ -29,6 +29,12 @@ if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons
   touch /var/lib/slackpkg/current
 fi
 
+if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
+  if ! grep x86_64 /etc/os-release > /dev/null ; then
+    sed -i 's/^#ARCH.*$/ARCH=i386/' /etc/slackpkg/slackpkg.conf
+  fi
+fi
+
 sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
 slackpkg -default_answer=yes -batch=on update
