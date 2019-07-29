@@ -25,7 +25,7 @@ set -o pipefail
 
 base_image="$1"
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] ; then
+if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
   touch /var/lib/slackpkg/current
 fi
 
@@ -41,7 +41,7 @@ slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
 slackpkg -default_answer=yes -batch=on update
 
-if [ "$base_image" = "vbatts/slackware:current" ] ; then
+if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ]; then
   slackpkg -default_answer=yes -batch=on install pcre2 libpsl
 fi
 
