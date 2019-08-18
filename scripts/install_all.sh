@@ -30,7 +30,7 @@ if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons
 fi
 
 if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
-  if ! grep x86_64 /etc/os-release > /dev/null ; then
+  if [ ! -e /usr/lib64 ] ; then
     sed -i 's/^#ARCH.*$/ARCH=i386/' /etc/slackpkg/slackpkg.conf
   fi
 fi
