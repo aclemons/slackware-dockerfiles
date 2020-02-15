@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019 Andrew Clemons, Wellington New Zealand
+# Copyright 2019-2020 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -26,12 +26,12 @@ wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/r
 wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_details.txt
 gpg --verify slack-current-miniroot_details.txt.asc slack-current-miniroot_details.txt
 
-wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_01Jul19.tar.xz
+wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_11Feb20.tar.xz
 sha1sum --check <(sed -n '/miniroot/p' slack-current-miniroot_details.txt)
 
 cp /usr/bin/qemu-arm-static .
 
-for package in ap/diffutils-3.7-arm-1.txz ; do
+for package in ap/diffutils-3.7-arm-2.txz ; do
   wget --quiet "http://slackware.uk/slackwarearm/slackwarearm-current/slackware/$package"
   wget --quiet "http://slackware.uk/slackwarearm/slackwarearm-current/slackware/$package.asc"
 
