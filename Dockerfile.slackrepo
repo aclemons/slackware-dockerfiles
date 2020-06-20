@@ -6,4 +6,4 @@ RUN echo "Using base image $base_image"
 
 COPY scripts/install_slackrepo.sh /
 RUN bash /install_slackrepo.sh
-RUN rm /install_slackrepo.sh
+RUN rm /install_slackrepo.sh #!COMMIT

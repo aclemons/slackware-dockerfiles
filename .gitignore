@@ -2,3 +2,4 @@
 *.txz
 qemu-*-static
 slack-*-miniroot*
+local_mirrors

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019 Andrew Clemons, Wellington New Zealand
+# Copyright 2019-2020 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -24,6 +24,9 @@ set -e
 set -o pipefail
 
 base_image="$1"
+local_mirror="$2"
+
+echo "Using base_image=$base_image, local_mirror=$local_mirror"
 
 if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
   touch /var/lib/slackpkg/current
@@ -36,6 +39,11 @@ if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
 fi
 
 sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
+
+if [ -e "$local_mirror" ] ; then
+  sed -i "s,^# file.*$,file:/$local_mirror/," /etc/slackpkg/mirrors
+  sed -i 's/^h/^# h/' /etc/slackpkg/mirrors
+fi
 
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
