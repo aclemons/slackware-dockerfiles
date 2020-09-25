@@ -42,8 +42,11 @@ sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
 if [ -e "$local_mirror" ] ; then
   sed -i "s,^# file.*$,file:/$local_mirror/," /etc/slackpkg/mirrors
-  sed -i 's/^h/^# h/' /etc/slackpkg/mirrors
+  sed -i 's/^h/# h/' /etc/slackpkg/mirrors
 fi
+
+sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
+sed -i '/^PRIORITY/s/patches /patches extra /' /etc/slackpkg/slackpkg.conf
 
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
