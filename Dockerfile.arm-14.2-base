@@ -2,7 +2,7 @@ FROM scratch
 
 ADD slack-14.2-miniroot_01Jul16.tar.xz /
 COPY qemu-arm-static /usr/bin
-RUN echo "http://slackware.uk/slackwarearm/slackwarearm-14.2/" >> /etc/slackpkg/mirrors
+RUN echo "https://slackware.uk/slackwarearm/slackwarearm-14.2/" >> /etc/slackpkg/mirrors
 RUN echo "# file://path/to/some/directory/" >> /etc/slackpkg/mirrors
 RUN sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf
 RUN sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf

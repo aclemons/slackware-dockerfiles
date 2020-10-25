@@ -22,18 +22,18 @@
 
 set -e
 
-wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt.asc
-wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt.asc
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt
 gpg --verify slack-14.2-miniroot_details.txt.asc slack-14.2-miniroot_details.txt
 
-wget --quiet http://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_01Jul16.tar.xz
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_01Jul16.tar.xz
 sha1sum --check <(sed -n '/miniroot/p' slack-14.2-miniroot_details.txt)
 
 cp /usr/bin/qemu-arm-static .
 
 for package in ap/diffutils-3.3-arm-2.txz n/gnupg-1.4.20-arm-1.txz l/libunistring-0.9.3-arm-2.txz ; do
-  wget --quiet "http://slackware.uk/slackwarearm/slackwarearm-14.2/slackware/$package"
-  wget --quiet "http://slackware.uk/slackwarearm/slackwarearm-14.2/slackware/$package.asc"
+  wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-14.2/slackware/$package"
+  wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-14.2/slackware/$package.asc"
 
   package=${package##*/}
   gpg --verify "$package.asc" "$package"
