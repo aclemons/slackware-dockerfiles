@@ -26,7 +26,7 @@ wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/
 wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_details.txt
 gpg --verify slack-current-miniroot_details.txt.asc slack-current-miniroot_details.txt
 
-wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_17Jun20.tar.xz
+wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$(sed -n '/slack-current-miniroot_/p' slack-current-miniroot_details.txt | awk '{ print $2 }')"
 sha1sum --check <(sed -n '/miniroot/p' slack-current-miniroot_details.txt)
 
 cp /usr/bin/qemu-arm-static .
