@@ -64,4 +64,8 @@ slackpkg -default_answer=yes -batch=on clean-system
 slackpkg -default_answer=yes -batch=on install rust
 slackpkg -default_answer=yes -batch=on new-config
 
+if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ]; then
+  slackpkg -default_answer=yes -batch=on reinstall ca-certificates
+fi
+
 rm -rf /var/cache/packages/*
