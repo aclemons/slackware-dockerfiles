@@ -23,11 +23,11 @@
 set -e
 set -o pipefail
 
-git clone --depth 1 https://github.com/aclemons/slackbuilds.org.git -b 14.2_acl
+wget -O - https://github.com/aclemons/slackbuilds.org/tarball/14.2_acl | tar xz
 
 export TAG=_jenkins
 (
-  cd slackbuilds.org
+  cd aclemons-slackbuilds.org-*
 
   cd system/slackrepo
   # shellcheck disable=SC1091
@@ -46,7 +46,7 @@ export TAG=_jenkins
   sh slackrepo-hints.SlackBuild
 )
 
-rm -rf slackbuilds.org
+rm -rf aclemons-slackbuilds.org-*
 
 installpkg /tmp/slackrepo-*.t?z
 
