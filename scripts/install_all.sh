@@ -46,6 +46,7 @@ if [ -e "$local_mirror" ] ; then
 fi
 
 sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
+sed -i '/^PRIORITY/s/testing //' /etc/slackpkg/slackpkg.conf
 sed -i '/^PRIORITY/s/patches /patches extra /' /etc/slackpkg/slackpkg.conf
 
 slackpkg -default_answer=yes -batch=on update
