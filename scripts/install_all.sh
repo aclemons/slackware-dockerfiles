@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019-2020 Andrew Clemons, Wellington New Zealand
+# Copyright 2019-2021 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -23,6 +23,27 @@
 set -e
 set -o pipefail
 
+configure_slackpkg() {
+  local mirror="$1"
+
+  if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
+    if [ ! -e /usr/lib64 ] ; then
+      sed -i 's/^#ARCH.*$/ARCH=i386/' /etc/slackpkg/slackpkg.conf
+    fi
+  fi
+
+  sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
+
+  if [ -e "$mirror" ] ; then
+    sed -i "s,^# file.*$,file:/$mirror/," /etc/slackpkg/mirrors
+    sed -i 's/^h/# h/' /etc/slackpkg/mirrors
+  fi
+
+  sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
+  sed -i '/^PRIORITY/s/testing //' /etc/slackpkg/slackpkg.conf
+  sed -i '/^PRIORITY/s/patches /patches extra /' /etc/slackpkg/slackpkg.conf
+}
+
 base_image="$1"
 local_mirror="$2"
 
@@ -32,29 +53,20 @@ if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons
   touch /var/lib/slackpkg/current
 fi
 
-if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
-  if [ ! -e /usr/lib64 ] ; then
-    sed -i 's/^#ARCH.*$/ARCH=i386/' /etc/slackpkg/slackpkg.conf
-  fi
-fi
-
-sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
-
-if [ -e "$local_mirror" ] ; then
-  sed -i "s,^# file.*$,file:/$local_mirror/," /etc/slackpkg/mirrors
-  sed -i 's/^h/# h/' /etc/slackpkg/mirrors
-fi
-
-sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
-sed -i '/^PRIORITY/s/testing //' /etc/slackpkg/slackpkg.conf
-sed -i '/^PRIORITY/s/patches /patches extra /' /etc/slackpkg/slackpkg.conf
+configure_slackpkg "$local_mirror"
 
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
+
+if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
+  mv /etc/slackpkg/slackpkg.conf.new /etc/slackpkg/slackpkg.conf
+  configure_slackpkg "$local_mirror"
+fi
+
 slackpkg -default_answer=yes -batch=on update
 
 if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ]; then
-  slackpkg -default_answer=yes -batch=on install pcre2 libpsl
+  slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl
 fi
 
 slackpkg -default_answer=yes -batch=on upgrade-all
@@ -63,10 +75,7 @@ slackpkg -default_answer=yes -batch=on install-new
 slackpkg -default_answer=yes -batch=on upgrade-all
 slackpkg -default_answer=yes -batch=on clean-system
 slackpkg -default_answer=yes -batch=on install rust
-slackpkg -default_answer=yes -batch=on new-config
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ]; then
-  slackpkg -default_answer=yes -batch=on reinstall ca-certificates
-fi
+find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 
 rm -rf /var/cache/packages/*
