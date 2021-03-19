@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019-2020 Andrew Clemons, Wellington New Zealand
+# Copyright 2019-2021 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -22,16 +22,16 @@
 
 set -e
 
-wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_details.txt.asc
-wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-current-miniroot_details.txt
-gpg --verify slack-current-miniroot_details.txt.asc slack-current-miniroot_details.txt
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-current-miniroot_details.txt.asc
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-current-miniroot_details.txt
+gpg --verify slackarm-current-miniroot_details.txt.asc slackarm-current-miniroot_details.txt
 
-wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$(sed -n '/slack-current-miniroot_/p' slack-current-miniroot_details.txt | awk '{ print $2 }')"
-sha1sum --check <(sed -n '/miniroot/p' slack-current-miniroot_details.txt)
+wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$(sed -n '/slackarm-current-miniroot_/p' slackarm-current-miniroot_details.txt | awk '{ print $2 }')"
+sha1sum --check <(sed -n '/miniroot_/p' slackarm-current-miniroot_details.txt)
 
 cp /usr/bin/qemu-arm-static .
 
-for package in ap/diffutils-3.7-arm-2.txz ; do
+for package in ap/diffutils-3.7-arm-3.txz ; do
   wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-current/slackware/$package"
   wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-current/slackware/$package.asc"
 
