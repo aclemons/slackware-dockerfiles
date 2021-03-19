@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019 Andrew Clemons, Wellington New Zealand
+# Copyright 2019,2021 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -22,12 +22,12 @@
 
 set -e
 
-wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt.asc
-wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_details.txt
-gpg --verify slack-14.2-miniroot_details.txt.asc slack-14.2-miniroot_details.txt
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-14.2-miniroot_details.txt.asc
+wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-14.2-miniroot_details.txt
+gpg --verify slackarm-14.2-miniroot_details.txt.asc slackarm-14.2-miniroot_details.txt
 
-wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slack-14.2-miniroot_01Jul16.tar.xz
-sha1sum --check <(sed -n '/miniroot/p' slack-14.2-miniroot_details.txt)
+wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$(sed -n '/slackarm-14.2-miniroot_/p' slackarm-14.2-miniroot_details.txt | awk '{ print $2 }')"
+sha1sum --check <(sed -n '/miniroot_/p' slackarm-14.2-miniroot_details.txt)
 
 cp /usr/bin/qemu-arm-static .
 
