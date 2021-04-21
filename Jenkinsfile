@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-// Copyright 2019-2020 Andrew Clemons, Wellington New Zealand
+// Copyright 2019-2021 Andrew Clemons, Wellington New Zealand
 // All rights reserved.
 //
 // Redistribution and use of this script, with or without modification, is
@@ -30,6 +30,8 @@ node('master') {
                 baseImage = 'vbatts/slackware:14.2'
             }
 
+            def args = "--build-arg base_image=${baseImage} --no-cache"
+
             def localMirror = env.LOCAL_MIRROR
             if (localMirror != null) {
                 def version = sh(returnStdout: true, script: "basename ${localMirror}").trim()
@@ -47,15 +49,12 @@ node('master') {
                 }
 
                 localMirror = "local_mirrors/${version}"
+                args = "${args} --build-arg use_local_mirror=true --build-arg local_mirror=${localMirror}"
             }
 
-            def args = "--build-arg base_image=${baseImage} --no-cache"
-
-            if (localMirror != null) {
-                args = "${args} --build-arg local_mirror=${localMirror}"
+            withEnv(["DOCKER_BUILDKIT=1"]) {
+                docker.build(env.DOCKER_IMAGE, "${args} .")
             }
-
-            docker.build(env.DOCKER_IMAGE, "${args} .")
 
             deleteDir()
         }

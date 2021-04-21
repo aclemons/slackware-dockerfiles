@@ -35,8 +35,10 @@ configure_slackpkg() {
   sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
   if [ -e "$mirror" ] ; then
+    echo "Configuring file mirror to: $mirror"
+
     sed -i "s,^# file.*$,file:/$mirror/," /etc/slackpkg/mirrors
-    sed -i 's/^h/# h/' /etc/slackpkg/mirrors
+    sed -i 's/^h/#xxxh/' /etc/slackpkg/mirrors
   fi
 
   sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
@@ -79,3 +81,7 @@ slackpkg -default_answer=yes -batch=on install rust
 find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 
 rm -rf /var/cache/packages/*
+
+if [ -e "$mirror" ] ; then
+  sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
+fi
