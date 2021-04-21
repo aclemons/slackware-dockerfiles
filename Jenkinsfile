@@ -30,7 +30,11 @@ node('master') {
                 baseImage = 'vbatts/slackware:14.2'
             }
 
-            def args = "--build-arg base_image=${baseImage} --no-cache"
+            def args = "--build-arg base_image=${baseImage}"
+
+            if ("true".equals(env.NO_CACHE)) {
+                args = "${args} --no-cache"
+            }
 
             def localMirror = env.LOCAL_MIRROR
             if (localMirror != null) {
