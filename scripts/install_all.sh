@@ -34,6 +34,16 @@ configure_slackpkg() {
 
   sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
+  if ! grep ^h /etc/slackpkg/mirrors > /dev/null ; then
+    if [ "$base_image" = "vbatts/slackware:current" ] ; then
+      echo "http://slackware.uk/slackware/slackware64-current/" >> /etc/slackpkg/mirrors
+    elif [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
+      echo "http://slackware.uk/slackware/slackware-current/" >> /etc/slackpkg/mirrors
+    elif [ "$base_image" = "aclemons/slackware:current_arm_base" ] ; then
+      echo "http://slackware.uk/slackwarearm/slackwarearm-current/" >> /etc/slackpkg/mirrors
+    fi
+  fi
+
   if [ -e "$mirror" ] ; then
     echo "Configuring file mirror to: $mirror"
 
@@ -60,8 +70,21 @@ configure_slackpkg "$local_mirror"
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
 
+if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
+  touch /var/lib/slackpkg/current
+fi
+
 if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
   mv /etc/slackpkg/slackpkg.conf.new /etc/slackpkg/slackpkg.conf
+
+  if [ -e /etc/slackpkg/mirrors.new ] ; then
+    mv /etc/slackpkg/mirrors.new /etc/slackpkg/mirrors
+  fi
+
+  if [ -e /etc/slackpkg/blacklist.new ] ; then
+    mv /etc/slackpkg/blacklist.new /etc/slackpkg/blacklist
+  fi
+
   configure_slackpkg "$local_mirror"
 fi
 
@@ -77,6 +100,8 @@ slackpkg -default_answer=yes -batch=on install-new
 slackpkg -default_answer=yes -batch=on upgrade-all
 slackpkg -default_answer=yes -batch=on clean-system
 slackpkg -default_answer=yes -batch=on install rust
+# seems this is a problem sometimes.
+slackpkg -default_answer=yes -batch=on reinstall ca-certificates
 
 find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 
@@ -84,4 +109,5 @@ rm -rf /var/cache/packages/*
 
 if [ -e "$mirror" ] ; then
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
+  sed -i 's/^file/# file/' /etc/slackpkg/mirrors
 fi
