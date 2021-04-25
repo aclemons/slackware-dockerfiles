@@ -25,6 +25,7 @@ set -o pipefail
 
 configure_slackpkg() {
   local mirror="$1"
+  local image="$2"
 
   if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
     if [ ! -e /usr/lib64 ] ; then
@@ -35,11 +36,11 @@ configure_slackpkg() {
   sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
   if ! grep ^h /etc/slackpkg/mirrors > /dev/null ; then
-    if [ "$base_image" = "vbatts/slackware:current" ] ; then
+    if [ "$image" = "vbatts/slackware:current" ] ; then
       echo "http://slackware.uk/slackware/slackware64-current/" >> /etc/slackpkg/mirrors
-    elif [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
+    elif [ "$image" = "aclemons/slackware:current_x86_base" ] ; then
       echo "http://slackware.uk/slackware/slackware-current/" >> /etc/slackpkg/mirrors
-    elif [ "$base_image" = "aclemons/slackware:current_arm_base" ] ; then
+    elif [ "$image" = "aclemons/slackware:current_arm_base" ] ; then
       echo "http://slackware.uk/slackwarearm/slackwarearm-current/" >> /etc/slackpkg/mirrors
     fi
   fi
@@ -65,7 +66,7 @@ if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons
   touch /var/lib/slackpkg/current
 fi
 
-configure_slackpkg "$local_mirror"
+configure_slackpkg "$local_mirror" "$base_image"
 
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
@@ -85,7 +86,7 @@ if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
     mv /etc/slackpkg/blacklist.new /etc/slackpkg/blacklist
   fi
 
-  configure_slackpkg "$local_mirror"
+  configure_slackpkg "$local_mirror" "$base_image"
 fi
 
 slackpkg -default_answer=yes -batch=on update
