@@ -53,12 +53,6 @@ installpkg /tmp/slackrepo-*.t?z
 rm -rf /tmp/slackrepo*
 rm -rf /tmp/SBo
 
-(
-  cd  /usr/local/bin
-  wget https://raw.githubusercontent.com/aclemons/slackrepo-jenkins/28b9b80ccbc332b54d7f1010207897d91b23bd88/slackrepo_parse.rb
-  chmod +x slackrepo_parse.rb
-)
-
 {
   find /boot -name 'uImage-armv7-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f3-
   find /boot -name 'vmlinuz-generic-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f3-
