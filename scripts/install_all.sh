@@ -111,4 +111,5 @@ rm -rf /var/cache/packages/*
 if [ -e "$mirror" ] ; then
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
   sed -i 's/^file/# file/' /etc/slackpkg/mirrors
+  rm -rf "$mirror"
 fi

@@ -19,5 +19,4 @@ COPY "$local_mirror" /mirror
 RUN bash /install_all.sh "$base_image" /mirror
 
 FROM using-mirror-${use_local_mirror} AS final
-RUN rm /install_all.sh
-RUN rm -rf /mirror #!COMMIT
+RUN rm /install_all.sh #!COMMIT
