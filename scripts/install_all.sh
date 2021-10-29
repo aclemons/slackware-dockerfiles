@@ -89,24 +89,64 @@ if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
   configure_slackpkg "$local_mirror" "$base_image"
 fi
 
+# slackpkg tty fixes
+sed -i 's,SIZE=\$( stty size )$,SIZE=$( [[ $- != *i* ]] \&\& stty size || echo "0 0"),' /usr/libexec/slackpkg/functions.d/post-functions.sh
+
 slackpkg -default_answer=yes -batch=on update
 
 if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ]; then
-  slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl
+  EXIT_CODE=0
+  slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl || EXIT_CODE=$?
+
+  if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+    exit $EXIT_CODE
+  fi
 fi
 
-slackpkg -default_answer=yes -batch=on upgrade-all
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on upgrade-all || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
+
 slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/*
-slackpkg -default_answer=yes -batch=on install-new
-slackpkg -default_answer=yes -batch=on upgrade-all
-slackpkg -default_answer=yes -batch=on clean-system
-slackpkg -default_answer=yes -batch=on install rust
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on install-new || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
+
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on upgrade-all || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
+
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on clean-system || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
+
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on install rust || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
+
 # seems this is a problem sometimes.
-slackpkg -default_answer=yes -batch=on reinstall ca-certificates
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on reinstall ca-certificates || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
 
 find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 
 rm -rf /var/cache/packages/*
+
+# slackpkg tty fixes
+sed -i 's,SIZE=\$( \[\[ \$- != \*i\* \]\] \&\& stty size || echo "0 0"),SIZE=$( stty size ),' /usr/libexec/slackpkg/functions.d/post-functions.sh
 
 if [ -e "$mirror" ] ; then
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
