@@ -148,8 +148,8 @@ rm -rf /var/cache/packages/*
 # slackpkg tty fixes
 sed -i 's,SIZE=\$( \[\[ \$- != \*i\* \]\] \&\& stty size || echo "0 0"),SIZE=$( stty size ),' /usr/libexec/slackpkg/functions.d/post-functions.sh
 
-if [ -e "$mirror" ] ; then
+if [ -e "$local_mirror" ] ; then
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
   sed -i 's/^file/# file/' /etc/slackpkg/mirrors
-  rm -rf "$mirror"
+  rm -rf "$local_mirror"
 fi
