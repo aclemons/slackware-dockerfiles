@@ -109,7 +109,7 @@ if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
 fi
 
-slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/*
+slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
 EXIT_CODE=0
 slackpkg -default_answer=yes -batch=on install-new || EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
