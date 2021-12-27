@@ -31,7 +31,7 @@ sha1sum --check <(sed -n '/miniroot_/p' slackarm-current-miniroot_details.txt)
 
 cp /usr/bin/qemu-arm-static .
 
-for package in ap/diffutils-3.7-arm-3.txz ; do
+for package in ap/diffutils-3.8-arm-1.txz ; do
   wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-current/slackware/$package"
   wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-current/slackware/$package.asc"
 
