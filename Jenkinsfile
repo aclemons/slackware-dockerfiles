@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-// Copyright 2019-2021 Andrew Clemons, Wellington New Zealand
+// Copyright 2019-2022 Andrew Clemons, Wellington New Zealand
 // All rights reserved.
 //
 // Redistribution and use of this script, with or without modification, is
@@ -37,7 +37,9 @@ node('master') {
             }
 
             def localMirror = env.LOCAL_MIRROR
-            if (localMirror != null) {
+            if (localMirror == null) {
+                docker.build(env.DOCKER_IMAGE, "${args} .")
+            } else {
                 def version = sh(returnStdout: true, script: "basename ${localMirror}").trim()
 
                 dir("local_mirrors") {
@@ -47,17 +49,13 @@ node('master') {
 
                 sh("bash scripts/sync_local_mirror.sh ${version}")
 
-                dir("local_mirrors") {
-                    sh("unlink ${version}")
-                    sh("cp -a ${localMirror} .")
+                docker.image('nginx:alpine').withRun("-v ${localMirror}:/usr/share/nginx/html/${version}:ro -p 80") { c ->
+                    def localPort = sh(script: "#!/bin/bash -e\ndocker port ${c.id} 80 | cut -d: -f2", returnStdout: true).trim()
+
+                    args = "${args} --build-arg mirror=http://localhost:${localPort}/${version}/ --network=host"
+
+                    docker.build(env.DOCKER_IMAGE, "${args} .")
                 }
-
-                localMirror = "local_mirrors/${version}"
-                args = "${args} --build-arg use_local_mirror=true --build-arg local_mirror=${localMirror}"
-            }
-
-            withEnv(["DOCKER_BUILDKIT=1"]) {
-                docker.build(env.DOCKER_IMAGE, "${args} .")
             }
 
             deleteDir()

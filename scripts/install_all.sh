@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019-2021 Andrew Clemons, Wellington New Zealand
+# Copyright 2019-2022 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -45,11 +45,12 @@ configure_slackpkg() {
     fi
   fi
 
-  if [ -e "$mirror" ] ; then
-    echo "Configuring file mirror to: $mirror"
+  if [ -n "$mirror" ] ; then
+    echo "Configuring mirror to: $mirror"
 
-    sed -i "s,^# file.*$,file:/$mirror/," /etc/slackpkg/mirrors
     sed -i 's/^h/#xxxh/' /etc/slackpkg/mirrors
+    sed -i "/$(printf '%s\n' "$mirror" | sed -e 's/[]\/$*.^[]/\\&/g')/d" /etc/slackpkg/mirrors
+    echo "$mirror" >> /etc/slackpkg/mirrors
   fi
 
   sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
@@ -58,15 +59,15 @@ configure_slackpkg() {
 }
 
 base_image="$1"
-local_mirror="$2"
+mirror="$2"
 
-echo "Using base_image=$base_image, local_mirror=$local_mirror"
+echo "Using base_image=$base_image, mirror=$mirror"
 
 if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
   touch /var/lib/slackpkg/current
 fi
 
-configure_slackpkg "$local_mirror" "$base_image"
+configure_slackpkg "$mirror" "$base_image"
 
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
@@ -86,10 +87,11 @@ if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
     mv /etc/slackpkg/blacklist.new /etc/slackpkg/blacklist
   fi
 
-  configure_slackpkg "$local_mirror" "$base_image"
+  configure_slackpkg "$mirror" "$base_image"
 fi
 
 # slackpkg tty fixes
+# shellcheck disable=SC2016
 sed -i 's,SIZE=\$( stty size )$,SIZE=$( [[ $- != *i* ]] \&\& stty size || echo "0 0"),' /usr/libexec/slackpkg/functions.d/post-functions.sh
 
 slackpkg -default_answer=yes -batch=on update
@@ -148,10 +150,10 @@ find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 rm -rf /var/cache/packages/*
 
 # slackpkg tty fixes
+# shellcheck disable=SC2016
 sed -i 's,SIZE=\$( \[\[ \$- != \*i\* \]\] \&\& stty size || echo "0 0"),SIZE=$( stty size ),' /usr/libexec/slackpkg/functions.d/post-functions.sh
 
-if [ -e "$local_mirror" ] ; then
+if [ -n "$mirror" ] ; then
+  sed -i '$d' /etc/slackpkg/mirrors
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
-  sed -i 's/^file/# file/' /etc/slackpkg/mirrors
-  rm -rf "$local_mirror"
 fi
