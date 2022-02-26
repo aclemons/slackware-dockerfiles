@@ -31,10 +31,10 @@ To build a Slackwaream-current full image:
 
     $ # ensure you have imported the slackwarearm gpg key
     $ bash scripts/fetch_current_arm_files.sh
-    $ docker build --tag aclemons/slackware:current_arm_base --file Dockerfile.arm-current-base --no-cache .
+    $ docker build --tag aclemons/slackware:current-arm-base --file slackwarearm-current/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackwarearm-current
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-current:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
-    $ docker build --network=host --tag aclemons/slackware:current_arm_full --build-arg base_image=aclemons/slackware:current_arm_base --build-arg mirror=http://localhost:3000 --no-cache .
+    $ docker build --network=host --tag aclemons/slackware:current-arm-full --build-arg base_image=aclemons/slackware:current-arm-base --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 
 Note for arm support, I am using qemu-user-static-bin from slackbuilds.org to build this image from a non-arm host.
