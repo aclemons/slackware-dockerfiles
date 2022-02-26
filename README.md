@@ -23,10 +23,10 @@ To build a Slackwaream-14.2 full image:
 
     $ # ensure you have imported the slackwarearm gpg key
     $ bash scripts/fetch_14.2_arm_files.sh
-    $ docker build --tag aclemons/slackware:14.2_arm_base --file Dockerfile.arm-14.2-base --no-cache .
-    $ bash scripts/sync_local_mirror.sh slackwarearm-current
-    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-current:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
-    $ docker build --network=host --tag aclemons/slackware:14.2_arm_full --build-arg base_image=aclemons/slackware:14.2_arm_base --build-arg mirror=http://localhost:3000 --no-cache .
+    $ docker build --tag aclemons/slackware:14.2-arm-base --file slackwarearm-14.2/Dockerfile --no-cache .
+    $ bash scripts/sync_local_mirror.sh slackwarearm-14.2
+    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-14.2:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
+    $ docker build --network=host --tag aclemons/slackware:14.2-arm-full --build-arg base_image=aclemons/slackware:14.2-arm-base --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 
 To build a Slackwaream-current full image:
@@ -34,8 +34,8 @@ To build a Slackwaream-current full image:
     $ # ensure you have imported the slackwarearm gpg key
     $ bash scripts/fetch_current_arm_files.sh
     $ docker build --tag aclemons/slackware:current_arm_base --file Dockerfile.arm-current-base --no-cache .
-    $ bash scripts/sync_local_mirror.sh slackwarearm-14.2
-    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-14.2:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
+    $ bash scripts/sync_local_mirror.sh slackwarearm-current
+    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-current:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
     $ docker build --network=host --tag aclemons/slackware:current_arm_full --build-arg base_image=aclemons/slackware:current_arm_base --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 

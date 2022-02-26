@@ -1,5 +1,5 @@
 *.asc
 *.txz
-qemu-*-static
-slack-*-miniroot*
 local_mirrors
+qemu-*-static
+slackarm-*-miniroot*
