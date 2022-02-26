@@ -19,7 +19,7 @@ To build a Slackware64-current full image:
     $ docker build --network=host --tag aclemons/slackware:current_x86_64_full --build-arg base_image=vbatts/slackware:current --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 
-To build a Slackwaream-14.2 full image:
+To build a Slackwarearm-14.2 full image:
 
     $ docker build --tag aclemons/slackware:14.2-arm-base --file slackwarearm-14.2/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackwarearm-14.2
@@ -27,7 +27,15 @@ To build a Slackwaream-14.2 full image:
     $ docker build --network=host --tag aclemons/slackware:14.2-arm-full --build-arg base_image=aclemons/slackware:14.2-arm-base --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 
-To build a Slackwaream-current full image:
+To build a Slackwarearm-15.0 full image:
+
+    $ docker build --tag aclemons/slackware:15.0-arm-base --file slackwarearm-15.0/Dockerfile --no-cache .
+    $ bash scripts/sync_local_mirror.sh slackwarearm-15.0
+    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-15.0:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
+    $ docker build --network=host --tag aclemons/slackware:15.0-arm-full --build-arg base_image=aclemons/slackware:15.0-arm-base --build-arg mirror=http://localhost:3000 --no-cache .
+    $ docker container stop mirror
+
+To build a Slackwarearm-current full image:
 
     $ docker build --tag aclemons/slackware:current-arm-base --file slackwarearm-current/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackwarearm-current
