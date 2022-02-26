@@ -24,8 +24,6 @@ node {
     stage('build') {
         checkout scm
 
-        sh("bash scripts/fetch_current_arm_files.sh")
-
         def args = "--file slackwarearm-current/Dockerfile"
 
         if ("true".equals(env.NO_CACHE)) {

@@ -29,8 +29,6 @@ To build a Slackwaream-14.2 full image:
 
 To build a Slackwaream-current full image:
 
-    $ # ensure you have imported the slackwarearm gpg key
-    $ bash scripts/fetch_current_arm_files.sh
     $ docker build --tag aclemons/slackware:current-arm-base --file slackwarearm-current/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackwarearm-current
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-current:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
