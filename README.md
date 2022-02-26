@@ -43,4 +43,12 @@ To build a Slackwarearm-current full image:
     $ docker build --network=host --tag aclemons/slackware:current-arm-full --build-arg base_image=aclemons/slackware:current-arm-base --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 
+To build a Slackwareaarch64-current full image:
+
+    $ docker build --tag aclemons/slackware:current-aarch64-base --file slackwareaarch64-current/Dockerfile --no-cache .
+    $ bash scripts/sync_local_mirror.sh slackwareaarch64-current
+    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwareaarch64-current:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
+    $ docker build --network=host --tag aclemons/slackware:current-arm-full --build-arg base_image=aclemons/slackware:current-arm-base --build-arg mirror=http://localhost:3000 --no-cache .
+    $ docker container stop mirror
+
 Note for arm support, I am using qemu-user-static-bin from slackbuilds.org to build this image from a non-arm host.
