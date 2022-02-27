@@ -22,13 +22,66 @@
 
 set -e
 
-apk add --no-cache wget git bash curl cpio file
+apk add --no-cache wget git bash curl cpio file patch
 
 cd /tmp
 
 git clone https://github.com/vbatts/slackware-container.git
 cd slackware-container
 git checkout 312ffcc5d4d9ce9d17bc53adf2e20887a0fc78b5
+
+cat << 'EOF' | patch -p1
+diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
+index d0bd3bf..20174fe 100755
+--- a/mkimage-slackware.sh
++++ b/mkimage-slackware.sh
+@@ -21,11 +21,9 @@ ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
+ CWD=$(pwd)
+ 
+ base_pkgs="a/aaa_base \
+-	a/aaa_elflibs \
+ 	a/aaa_libraries \
+ 	a/coreutils \
+ 	a/glibc-solibs \
+-	a/aaa_glibc-solibs \
+ 	a/aaa_terminfo \
+ 	a/pam \
+ 	a/cracklib \
+@@ -72,6 +70,24 @@ base_pkgs="a/aaa_base \
+ 	n/iproute2 \
+ 	n/openssl"
+ 
++base_pkgs_legacy="a/aaa_elflibs \
++	a/glibc-solibs"
++base_pkgs_15_0="a/aaa_libraries \
++	a/aaa_glibc-solibs"
++base_pkgs_current="a/aaa_libraries \
++	a/aaa_glibc-solibs"
++
++if [[ "$VERSION" == "current" ]]; then
++  base_pkgs="$base_pkgs_current \
++	$base_pkgs"
++elif [[ "$VERSION" == "15.0" ]]; then
++  base_pkgs="$base_pkgs_15_0 \
++	$base_pkgs"
++else
++  base_pkgs="$base_pkgs_legacy \
++	$base_pkgs"
++fi
++
+ function cacheit() {
+ 	file=$1
+ 	if [ ! -f "${CACHEFS}/${file}"  ] ; then
+@@ -126,7 +142,7 @@ fi
+ # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
+ root_env=""
+ root_flag="--root /mnt"
+-if [ "$VERSION" = "current" ] ; then
++if [ "$VERSION" = "15.0" ] || [ "$VERSION" = "current" ] ; then
+ 	root_env='ROOT=/mnt'
+ 	root_flag=''
+ fi
+EOF
 
 RELEASENAME=${RELEASENAME:-}
 ARCH=${ARCH:-}
