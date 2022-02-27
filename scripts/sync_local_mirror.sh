@@ -35,4 +35,5 @@ if printf '%s\n' "$version" | grep 'slackwarearm' >/dev/null 2>&1 ; then
   base_dir="slackwarearm"
 fi
 
+mkdir -p "local_mirrors/$version"
 rsync --delete -rlptD --delete-excluded --bwlimit 0 --exclude pasture --exclude source "slackware.uk::$base_dir/$version/" "local_mirrors/$version"

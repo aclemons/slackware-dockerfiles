@@ -75,7 +75,12 @@ configure_current "$base_image"
 configure_slackpkg "$mirror" "$base_image"
 
 slackpkg -default_answer=yes -batch=on update
-slackpkg -default_answer=yes -batch=on upgrade slackpkg
+
+EXIT_CODE=0
+slackpkg -default_answer=yes -batch=on upgrade slackpkg || EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+  exit $EXIT_CODE
+fi
 
 configure_current "$base_image"
 
