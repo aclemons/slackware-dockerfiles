@@ -22,13 +22,33 @@
 
 set -e
 
-apk add --no-cache wget git bash curl cpio
+apk add --no-cache wget git bash curl cpio file
 
 cd /tmp
 
 git clone https://github.com/vbatts/slackware-container.git
 cd slackware-container
 git checkout 312ffcc5d4d9ce9d17bc53adf2e20887a0fc78b5
-RELEASENAME=slackware ARCH=i586 VERSION=current bash mkimage-slackware.sh
-chown "$CHOWN_TO" slackware-current.tar
-mv slackware-current.tar /data
+
+RELEASENAME=${RELEASENAME:-}
+ARCH=${ARCH:-}
+VERSION=${VERSION:-}
+
+if [ -z "$RELEASENAME" ] ; then
+  echo "RELEASENAME not set"
+  exit 1
+fi
+
+if [ -z "$ARCH" ] ; then
+  echo "ARCH not set"
+  exit 1
+fi
+
+if [ -z "$VERSION" ] ; then
+  echo "VERSION not set"
+  exit 1
+fi
+
+RELEASENAME="$RELEASENAME" ARCH="$ARCH" VERSION="$VERSION" bash mkimage-slackware.sh
+chown "$CHOWN_TO" "$RELEASENAME-$VERSION.tar"
+mv "$RELEASENAME-$VERSION.tar" /data

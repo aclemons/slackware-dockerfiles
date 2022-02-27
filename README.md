@@ -7,7 +7,7 @@ Some Dockerfiles I use with Jenkins for building packages.
 
 To build a Slackware-14.2 full image:
 
-    $ docker run --privileged --rm -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_14.2_x86_base_image.sh:/build_14.2_x86_base_image.sh" alpine:3.15 sh /build_14.2_x86_base_image.sh
+    $ docker run --privileged --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=14.2 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_14.2_x86_base_image.sh:/build_14.2_x86_base_image.sh" alpine:3.15 sh /build_14.2_x86_base_image.sh
     $ docker build --tag aclemons/slackware:14.2-x86-base --file slackware-14.2/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackware-14.2
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackware-14.2:/usr/share/nginx/html:ro" -p 3000:80 --name mirror nginx:alpine
@@ -16,7 +16,7 @@ To build a Slackware-14.2 full image:
 
 To build a Slackware-15.0 full image:
 
-    $ docker run --privileged --rm -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_15.0_x86_base_image.sh:/build_15.0_x86_base_image.sh" alpine:3.15 sh /build_15.0_x86_base_image.sh
+    $ docker run --privileged --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=15.0 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_15.0_x86_base_image.sh:/build_15.0_x86_base_image.sh" alpine:3.15 sh /build_15.0_x86_base_image.sh
     $ docker build --tag aclemons/slackware:15.0-x86-base --file slackware-15.0/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackware-15.0
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackware-15.0:/usr/share/nginx/html:ro" -p 3000:80 --name mirror nginx:alpine
@@ -25,7 +25,7 @@ To build a Slackware-15.0 full image:
 
 To build a Slackware-current full image:
 
-    $ docker run --privileged --rm -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_current_x86_base_image.sh:/build_current_x86_base_image.sh" alpine:3.15 sh /build_current_x86_base_image.sh
+    $ docker run --privileged --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=current -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_current_x86_base_image.sh:/build_current_x86_base_image.sh" alpine:3.15 sh /build_current_x86_base_image.sh
     $ docker build --tag aclemons/slackware:current-x86-base --file slackware-current/Dockerfile --no-cache .
     $ bash scripts/sync_local_mirror.sh slackware-current
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackware-current:/usr/share/nginx/html:ro" -p 3000:80 --name mirror nginx:alpine
