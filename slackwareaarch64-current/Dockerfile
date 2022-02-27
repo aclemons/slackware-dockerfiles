@@ -58,4 +58,7 @@ COPY slackwareaarch64-current/GPG-KEY* /tmp/
 RUN \
     upgradepkg --install-new /tmp/*.txz && \
     gpg --import /tmp/GPG-KEY* && \
-    rm /tmp/*
+    rm /tmp/* && \
+    sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf

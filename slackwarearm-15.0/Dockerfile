@@ -61,4 +61,7 @@ RUN \
     rm /tmp/*
 
 RUN \
-    sed -i '/slackwarearm-15.0/s/^#\(http:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors
+    sed -i '/slackwarearm-15.0/s/^#\(http:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors && \
+    sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf

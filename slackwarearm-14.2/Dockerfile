@@ -72,4 +72,8 @@ RUN \
     slackpkg -default_answer=yes -batch=on update && \
     slackpkg -default_answer=yes -batch=on upgrade-all && \
     find / -xdev -type f -name "*.new" -exec rename ".new" "" {} + && \
-    rm -rf /var/cache/packages/* && rm -rf /var/lib/slackpkg/*
+    rm -rf /var/cache/packages/* && rm -rf /var/lib/slackpkg/* && \
+    sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf
+
