@@ -44,7 +44,7 @@ configure_slackpkg() {
   sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
   if ! grep ^h /etc/slackpkg/mirrors > /dev/null 2>&1 ; then
-    if [ "$image" = "vbatts/slackware:current" ] ; then
+    if [ "$image" = "aclemons/slackware:current-x86_64-base" ] ; then
       echo "http://slackware.uk/slackware/slackware64-current/" >> /etc/slackpkg/mirrors
     elif [ "$image" = "aclemons/slackware:current-x86-base" ] ; then
       echo "http://slackware.uk/slackware/slackware-current/" >> /etc/slackpkg/mirrors

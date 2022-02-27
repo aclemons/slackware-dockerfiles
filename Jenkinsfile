@@ -27,7 +27,7 @@ node('master') {
         ansiColor('xterm') {
             def baseImage = env.BASE_IMAGE
             if (baseImage == null) {
-                baseImage = 'vbatts/slackware:14.2'
+                baseImage = 'aclemons/slackware:14.2-x86_64-full'
             }
 
             def args = "--build-arg base_image=${baseImage}"
