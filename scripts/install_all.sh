@@ -26,7 +26,7 @@ set -o pipefail
 configure_current() {
   local image="$1"
 
-  if [ "$image" = "vbatts/slackware:current" ] || [ "$image" = "aclemons/slackware:current-arm-base" ] || [ "$image" = "aclemons/slackware:current_x86_base" ] || [ "$image" = "aclemons/slackware:current-aarch64-base" ] ; then
+  if [ "$image" = "vbatts/slackware:current" ] || [ "$image" = "aclemons/slackware:current-arm-base" ] || [ "$image" = "aclemons/slackware:current-x86-base" ] || [ "$image" = "aclemons/slackware:current-aarch64-base" ] ; then
     touch /var/lib/slackpkg/current
   fi
 }
@@ -46,9 +46,9 @@ configure_slackpkg() {
   if ! grep ^h /etc/slackpkg/mirrors > /dev/null ; then
     if [ "$image" = "vbatts/slackware:current" ] ; then
       echo "http://slackware.uk/slackware/slackware64-current/" >> /etc/slackpkg/mirrors
-    elif [ "$image" = "aclemons/slackware:current_x86_base" ] ; then
+    elif [ "$image" = "aclemons/slackware:current-x86-base" ] ; then
       echo "http://slackware.uk/slackware/slackware-current/" >> /etc/slackpkg/mirrors
-    elif [ "$image" = "aclemons/slackware:current_arm_base" ] ; then
+    elif [ "$image" = "aclemons/slackware:current-arm-base" ] ; then
       echo "http://slackware.uk/slackwarearm/slackwarearm-current/" >> /etc/slackpkg/mirrors
     fi
   fi
@@ -77,7 +77,7 @@ configure_slackpkg "$mirror" "$base_image"
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
+if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current-arm-base" ] || [ "$base_image" = "aclemons/slackware:current-x86-base" ] ; then
   touch /var/lib/slackpkg/current
 fi
 
@@ -101,7 +101,7 @@ sed -i 's,SIZE=\$( stty size )$,SIZE=$( [[ $- != *i* ]] \&\& stty size || echo "
 
 slackpkg -default_answer=yes -batch=on update
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ]; then
+if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current-x86-base" ]; then
   EXIT_CODE=0
   slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl || EXIT_CODE=$?
 

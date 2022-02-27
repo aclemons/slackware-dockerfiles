@@ -14,6 +14,15 @@ To build a Slackware-14.2 full image:
     $ docker build --network=host --tag aclemons/slackware:14.2-x86-full --build-arg base_image=aclemons/slackware:14.2-x86-base --build-arg mirror=http://localhost:3000 --no-cache .
     $ docker container stop mirror
 
+To build a Slackware-current full image:
+
+    $ docker run --privileged --rm -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts/build_current_x86_base_image.sh:/build_current_x86_base_image.sh" alpine:3.15 sh /build_current_x86_base_image.sh
+    $ docker build --tag aclemons/slackware:current-x86-base --file slackware-current/Dockerfile --no-cache .
+    $ bash scripts/sync_local_mirror.sh slackware-current
+    $ docker run -d --rm -v "$(pwd)/local_mirrors/slackware-current:/usr/share/nginx/html:ro" -p 3000:80 --name mirror nginx:alpine
+    $ docker build --network=host --tag aclemons/slackware:current-x86-full --build-arg base_image=aclemons/slackware:current-x86-base --build-arg mirror=http://localhost:3000 --no-cache .
+    $ docker container stop mirror
+
 To build a Slackware64-14.2 full image:
 
     $ bash scripts/sync_local_mirror.sh slackware64-14.2

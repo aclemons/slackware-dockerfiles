@@ -26,22 +26,12 @@ node('master') {
 
         def userId = sh(returnStdout: true, script: '#!/bin/sh -e\nid -u').trim()
         def groupId = sh(returnStdout: true, script: '#!/bin/sh -e\nid -g').trim()
-
-        sh("rm -rf slackware-container")
-        sh("git clone --depth 1 https://github.com/vbatts/slackware-container.git")
+        def dir = sh(returnStdout: true, script: '#!/bin/sh -e\npwd').trim()
 
         // run in a privileged container so we can set root perms etc
-        docker.image("vbatts/slackware:current").inside("-u 0 --privileged") {
-            sh("touch /var/lib/slackpkg/current")
-            sh("slackpkg -default_answer=yes -batch=on update")
-            sh("slackpkg -default_answer=yes -batch=on install curl cyrus-sasl cpio nghttp2 ruby")
-
+        docker.image("alpine:3.15").inside("-u 0 --privileged -e CHOWN_TO=${userId}:${groupId} -v ${dir}:/data") {
             ansiColor('xterm') {
-                try {
-                    sh("bash scripts/build_current_x86_base_image.sh")
-                } finally {
-                    sh "#!/bin/sh -e\nchown -R ${userId}:${groupId} slackware-container"
-                }
+                sh("sh scripts/build_current_x86_base_image.sh")
             }
         }
 
