@@ -45,7 +45,7 @@ node('master') {
             }
         }
 
-        def args = "--file Dockerfile.x86-current-base"
+        def args = "--file slackware-current/Dockerfile"
 
         if ("true".equals(env.NO_CACHE)) {
             args = "${args} --no-cache"
