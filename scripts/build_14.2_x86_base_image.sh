@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-# Copyright 2019 Andrew Clemons, Wellington New Zealand
+# Copyright 2019,2022 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -21,11 +21,14 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set -e
-set -o pipefail
 
-(
-  cd slackware-container
+apk add --no-cache wget git bash curl cpio
 
-  RELEASENAME=slackware ARCH=i586 VERSION=14.2 bash mkimage-slackware.sh
-  mv slackware-14.2.tar ../
-)
+cd /tmp
+
+git clone https://github.com/vbatts/slackware-container.git
+cd slackware-container
+git checkout 312ffcc5d4d9ce9d17bc53adf2e20887a0fc78b5
+RELEASENAME=slackware ARCH=i586 VERSION=14.2 bash mkimage-slackware.sh
+chown "$CHOWN_TO" slackware-14.2.tar
+mv slackware-14.2.tar /data
