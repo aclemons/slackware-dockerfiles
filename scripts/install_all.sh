@@ -23,6 +23,14 @@
 set -e
 set -o pipefail
 
+configure_current() {
+  local image="$1"
+
+  if [ "$image" = "vbatts/slackware:current" ] || [ "$image" = "aclemons/slackware:current-arm-base" ] || [ "$image" = "aclemons/slackware:current_x86_base" ] || [ "$image" = "aclemons/slackware:current-aarch64-base" ] ; then
+    touch /var/lib/slackpkg/current
+  fi
+}
+
 configure_slackpkg() {
   local mirror="$1"
   local image="$2"
@@ -63,10 +71,7 @@ mirror="$2"
 
 echo "Using base_image=$base_image, mirror=$mirror"
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current_arm_base" ] || [ "$base_image" = "aclemons/slackware:current_x86_base" ] ; then
-  touch /var/lib/slackpkg/current
-fi
-
+configure_current "$base_image"
 configure_slackpkg "$mirror" "$base_image"
 
 slackpkg -default_answer=yes -batch=on update
@@ -148,6 +153,9 @@ fi
 find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 
 rm -rf /var/cache/packages/*
+rm -rf /var/lib/slackpkg/*
+
+configure_current "$base_image"
 
 # slackpkg tty fixes
 # shellcheck disable=SC2016
