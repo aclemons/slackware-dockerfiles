@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-// Copyright 2019-2021 Andrew Clemons, Wellington New Zealand
+// Copyright 2019-2022 Andrew Clemons, Wellington New Zealand
 // All rights reserved.
 //
 // Redistribution and use of this script, with or without modification, is
@@ -24,7 +24,7 @@ node('master') {
     stage('build') {
         checkout scm
 
-        def args = "--build-arg base_image=${env.BASE_IMAGE} --file Dockerfile.slackrepo"
+        def args = "--build-arg base_image=${env.BASE_IMAGE} --file slackrepo/Dockerfile"
 
         if ("true".equals(env.NO_CACHE)) {
             args = "${args} --no-cache"
