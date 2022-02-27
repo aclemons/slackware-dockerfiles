@@ -32,7 +32,7 @@ git checkout 312ffcc5d4d9ce9d17bc53adf2e20887a0fc78b5
 
 cat << 'EOF' | patch -p1
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index d0bd3bf..20174fe 100755
+index d0bd3bf..67c3132 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -21,11 +21,9 @@ ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
@@ -81,6 +81,15 @@ index d0bd3bf..20174fe 100755
  	root_env='ROOT=/mnt'
  	root_flag=''
  fi
+@@ -186,7 +202,7 @@ mount --bind /etc/resolv.conf etc/resolv.conf
+ PATH=/bin:/sbin:/usr/bin:/usr/sbin \
+ chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
+ PATH=/bin:/sbin:/usr/bin:/usr/sbin \
+-chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade-all'
++chroot . /bin/bash -c 'EXIT_CODE=0 && { /usr/sbin/slackpkg -batch=on -default_answer=y upgrade-all || EXIT_CODE=$? ; } && if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then exit $EXIT_CODE ; fi'
+ 
+ # now some cleanup of the minimal image
+ set +x
 EOF
 
 RELEASENAME=${RELEASENAME:-}
