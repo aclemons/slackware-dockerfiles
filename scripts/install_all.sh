@@ -26,7 +26,7 @@ set -o pipefail
 configure_current() {
   local image="$1"
 
-  if [ "$image" = "vbatts/slackware:current" ] || [ "$image" = "aclemons/slackware:current-arm-base" ] || [ "$image" = "aclemons/slackware:current-x86-base" ] || [ "$image" = "aclemons/slackware:current-aarch64-base" ] ; then
+  if echo "$image" | grep ':current' > /dev/null 2>&1 ; then
     touch /var/lib/slackpkg/current
   fi
 }
@@ -35,7 +35,7 @@ configure_slackpkg() {
   local mirror="$1"
   local image="$2"
 
-  if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null ; then
+  if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null 2>&1 ; then
     if [ ! -e /usr/lib64 ] ; then
       sed -i 's/^#ARCH.*$/ARCH=i386/' /etc/slackpkg/slackpkg.conf
     fi
@@ -43,7 +43,7 @@ configure_slackpkg() {
 
   sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
 
-  if ! grep ^h /etc/slackpkg/mirrors > /dev/null ; then
+  if ! grep ^h /etc/slackpkg/mirrors > /dev/null 2>&1 ; then
     if [ "$image" = "vbatts/slackware:current" ] ; then
       echo "http://slackware.uk/slackware/slackware64-current/" >> /etc/slackpkg/mirrors
     elif [ "$image" = "aclemons/slackware:current-x86-base" ] ; then
@@ -77,9 +77,7 @@ configure_slackpkg "$mirror" "$base_image"
 slackpkg -default_answer=yes -batch=on update
 slackpkg -default_answer=yes -batch=on upgrade slackpkg
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current-arm-base" ] || [ "$base_image" = "aclemons/slackware:current-x86-base" ] ; then
-  touch /var/lib/slackpkg/current
-fi
+configure_current "$base_image"
 
 if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
   mv /etc/slackpkg/slackpkg.conf.new /etc/slackpkg/slackpkg.conf
@@ -101,7 +99,7 @@ sed -i 's,SIZE=\$( stty size )$,SIZE=$( [[ $- != *i* ]] \&\& stty size || echo "
 
 slackpkg -default_answer=yes -batch=on update
 
-if [ "$base_image" = "vbatts/slackware:current" ] || [ "$base_image" = "aclemons/slackware:current-x86-base" ]; then
+if echo "$image" | grep ':current' > /dev/null 2>&1 ; then
   EXIT_CODE=0
   slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl || EXIT_CODE=$?
 
