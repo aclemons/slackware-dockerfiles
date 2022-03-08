@@ -168,3 +168,8 @@ if [ -n "$mirror" ] ; then
   sed -i '$d' /etc/slackpkg/mirrors
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
 fi
+
+(
+  cd /etc
+  ln -s /usr/share/zoneinfo/Etc/GMT localtime
+)
