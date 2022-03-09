@@ -23,6 +23,9 @@
 set -e
 set -o pipefail
 
+# terse package install for installpkg
+export TERSE=0
+
 wget -O - https://github.com/aclemons/slackbuilds.org/tarball/14.2_acl | tar xz
 
 export TAG=_jenkins

@@ -66,6 +66,9 @@ configure_slackpkg() {
   sed -i '/^PRIORITY/s/patches /patches extra /' /etc/slackpkg/slackpkg.conf
 }
 
+# terse package install for installpkg
+export TERSE=0
+
 base_image="$1"
 mirror="$2"
 

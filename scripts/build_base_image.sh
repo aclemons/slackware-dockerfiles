@@ -111,6 +111,9 @@ if [ -z "$VERSION" ] ; then
   exit 1
 fi
 
+# terse package install for installpkg
+export TERSE=0
+
 RELEASENAME="$RELEASENAME" ARCH="$ARCH" VERSION="$VERSION" bash mkimage-slackware.sh
 chown "$CHOWN_TO" "$RELEASENAME-$VERSION.tar"
 mv "$RELEASENAME-$VERSION.tar" /data
