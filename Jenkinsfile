@@ -44,6 +44,7 @@ node('master') {
 
                 dir("local_mirrors") {
                     sh("rm -rf ${version}")
+                    sh("mkdir -p ${localMirror}")
                     sh("ln -s ${localMirror}")
                 }
 
