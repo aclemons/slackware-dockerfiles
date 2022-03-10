@@ -26,11 +26,11 @@ set -o pipefail
 # terse package install for installpkg
 export TERSE=0
 
-wget -O - https://github.com/aclemons/slackbuilds.org/tarball/14.2_acl | tar xz
+wget -O - https://github.com/SlackBuildsOrg/slackbuilds/tarball/master | tar xz
 
 export TAG=_jenkins
 (
-  cd aclemons-slackbuilds.org-*
+  cd SlackBuildsOrg-slackbuilds-*
 
   cd system/slackrepo
   # shellcheck disable=SC1091
@@ -44,12 +44,15 @@ export TAG=_jenkins
   # shellcheck disable=SC1091
   . slackrepo-hints.info
 
+  # override the version temporarily
+  DOWNLOAD=https://github.com/aclemons/slackrepo-hints/archive/f7344831dfa95c1a1131e9299a46378bfa86f52b/slackrepo-hints-f7344831dfa95c1a1131e9299a46378bfa86f52b.tar.gz
+
   # shellcheck disable=SC2086
   wget $DOWNLOAD
-  sh slackrepo-hints.SlackBuild
+  VERSION=f7344831dfa95c1a1131e9299a46378bfa86f52b sh slackrepo-hints.SlackBuild
 )
 
-rm -rf aclemons-slackbuilds.org-*
+rm -rf SlackBuildsOrg-slackbuilds-*
 
 installpkg /tmp/slackrepo-*.t?z
 
