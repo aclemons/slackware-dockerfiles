@@ -61,8 +61,9 @@ rm -rf /tmp/SBo
 
 {
   find /boot -name 'uImage-armv7-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f3-
+  find /boot -name 'vmlinuz-generic-smp-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f4-
   find /boot -name 'vmlinuz-generic-*' -print0 | xargs -0 -I {} basename {} | cut -d- -f3-
-} | sed 's/^/export KERNEL=/' >> /etc/profile
+} | sed -n 1p | sed 's/^/export KERNEL=/' >> /etc/profile
 
 # PRETTY_NAME="Slackware 14.2 arm (post 14.2 -current)"
 if sed -n '/^PRETTY_NAME/p' /etc/os-release | grep post > /dev/null 2>&1 ; then
