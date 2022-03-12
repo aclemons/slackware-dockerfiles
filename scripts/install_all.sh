@@ -174,5 +174,5 @@ fi
 
 (
   cd /etc
-  ln -s /usr/share/zoneinfo/Etc/GMT localtime
+  ln -sf /usr/share/zoneinfo/Etc/GMT localtime
 )
