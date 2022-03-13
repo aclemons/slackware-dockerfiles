@@ -28,8 +28,8 @@ node('master') {
         def groupId = sh(returnStdout: true, script: '#!/bin/sh -e\nid -g').trim()
         def dir = sh(returnStdout: true, script: '#!/bin/sh -e\npwd').trim()
 
-        // run in a privileged container so we can set root perms etc
-        docker.image("alpine:3.15").inside("-u 0 --privileged -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=14.2 -e CHOWN_TO=${userId}:${groupId} -v ${dir}:/data") {
+        // add capability SYS_ADMIN so we can mount things etc etc
+        docker.image("alpine:3.15").inside("-u 0 --cap-add SYS_ADMIN -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=14.2 -e CHOWN_TO=${userId}:${groupId} -v ${dir}:/data") {
             ansiColor('xterm') {
                 sh("sh scripts/build_base_image.sh")
             }
