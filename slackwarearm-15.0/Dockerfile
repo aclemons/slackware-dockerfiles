@@ -24,19 +24,6 @@ RUN \
     rm slackarm-15.0-miniroot_details.txt* && \
     tar -xf "$tarball" && rm "$tarball"
 
-WORKDIR /tmp/qemu
-
-# fetch static qemu so we can run this container from an x86_64 host
-RUN wget --quiet http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb && \
-    echo 'df59e02c2275f55873ab491d32f35072957628c2  qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb' | sha1sum -c - && \
-    ar p qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb data.tar.xz | tar -xvJ && \
-    rm qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb && \
-    mv usr/bin/qemu-arm-static /tmp/miniroot/usr/bin && \
-    rm -rf usr
-
-WORKDIR /tmp/miniroot/usr/libexec/qemu-binfmt
-RUN ln -s ../../bin/qemu-arm-static arm-binfmt-P
-
 # fetch some packages requires to run slackpkg
 WORKDIR /tmp/pkgs
 
