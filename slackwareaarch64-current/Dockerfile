@@ -26,25 +26,14 @@ RUN \
 
 WORKDIR /tmp/qemu
 
-# fetch static qemu so we can run this container from an x86_64 host
-RUN wget --quiet http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb && \
-    echo 'df59e02c2275f55873ab491d32f35072957628c2  qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb' | sha1sum -c - && \
-    ar p qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb data.tar.xz | tar -xvJ && \
-    rm qemu-user-static_2.1+dfsg-12+deb8u6_amd64.deb && \
-    mv usr/bin/qemu-arm-static /tmp/miniroot/usr/bin && \
-    rm -rf usr
-
-WORKDIR /tmp/miniroot/usr/libexec/qemu-binfmt
-RUN ln -s ../../bin/qemu-aarch64-static aarch64-binfmt-P
-
 # fetch some packages requires to run slackpkg
 WORKDIR /tmp/pkgs
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN \
-    wget --quiet http://dl.slarm64.org/slackware/slarm64-current/slarm64/ap/diffutils-3.8-aarch64-1.txz && \
-    wget --quiet http://dl.slarm64.org/slackware/slarm64-current/slarm64/ap/diffutils-3.8-aarch64-1.txz.asc && \
+    wget --quiet https://slackware.uk/slackwarearm/slackwareaarch64-current/slackware/ap/diffutils-3.8-aarch64-1.txz && \
+    wget --quiet https://slackware.uk/slackwarearm/slackwareaarch64-current/slackware/ap/diffutils-3.8-aarch64-1.txz.asc && \
     gpg --verify diffutils-3.8-aarch64-1.txz.asc diffutils-3.8-aarch64-1.txz && \
     rm diffutils-3.8-aarch64-1.txz.asc
 

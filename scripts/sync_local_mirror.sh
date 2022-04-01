@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 Andrew Clemons, Wellington New Zealand
+# Copyright 2020,2022 Andrew Clemons, Wellington New Zealand
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -31,7 +31,7 @@ fi
 
 base_dir="slackware"
 
-if printf '%s\n' "$version" | grep 'slackwarearm' >/dev/null 2>&1 ; then
+if printf '%s\n' "$version" | grep -E 'slackwareaarch64|slackwarearm' >/dev/null 2>&1 ; then
   base_dir="slackwarearm"
 fi
 
