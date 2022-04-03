@@ -61,9 +61,7 @@ configure_slackpkg() {
     echo "$mirror" >> /etc/slackpkg/mirrors
   fi
 
-  sed -i '/^PRIORITY/s/extra //' /etc/slackpkg/slackpkg.conf
   sed -i '/^PRIORITY/s/testing //' /etc/slackpkg/slackpkg.conf
-  sed -i '/^PRIORITY/s/patches /patches extra /' /etc/slackpkg/slackpkg.conf
 }
 
 # terse package install for installpkg
