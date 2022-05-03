@@ -36,9 +36,14 @@ export TAG=_jenkins
   # shellcheck disable=SC1091
   . slackrepo.info
 
+  VERSION="$(curl -f  -s -H "Accept: application/json" "https://api.github.com/repos/aclemons/slackrepo/commits?per_page=1" | grep '"sha":' | sed -n 1p | cut -d: -f2 | sed 's/"//g;s/,//g;s/[[:space:]][[:space:]]*//g')"
+
+  # override the version temporarily
+  DOWNLOAD="https://github.com/aclemons/slackrepo/archive/$VERSION/slackrepo-$VERSION.tar.gz"
+
   # shellcheck disable=SC2086
   wget $DOWNLOAD
-  sh slackrepo.SlackBuild
+  VERSION="$VERSION" sh slackrepo.SlackBuild
 
   cd ../slackrepo-hints
   # shellcheck disable=SC1091
