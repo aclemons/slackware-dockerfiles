@@ -24,7 +24,7 @@ RUN \
     rm slackarm-15.0-miniroot_details.txt* && \
     tar -xf "$tarball" && rm "$tarball"
 
-# fetch some packages requires to run slackpkg
+# fetch some packages required to run slackpkg
 WORKDIR /tmp/pkgs
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
