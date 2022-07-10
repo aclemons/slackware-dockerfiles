@@ -69,20 +69,15 @@ export TERSE=0
 
 base_image="$1"
 mirror="$2"
+template="$3"
 
-echo "Using base_image=$base_image, mirror=$mirror"
+echo "Using base_image=$base_image, mirror=$mirror, template=$template"
 
 configure_current "$base_image"
 configure_slackpkg "$mirror" "$base_image"
 
+slackpkg -default_answer=yes -batch=on update gpg
 slackpkg -default_answer=yes -batch=on update
-
-# seems this is a problem sometimes.
-EXIT_CODE=0
-slackpkg -default_answer=yes -batch=on reinstall ca-certificates || EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
-  exit $EXIT_CODE
-fi
 
 EXIT_CODE=0
 slackpkg -default_answer=yes -batch=on upgrade slackpkg || EXIT_CODE=$?
@@ -127,14 +122,9 @@ if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
 fi
 
-slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
+slackpkg -default_answer=yes -batch=on install-template $template || EXIT_CODE=$?
 # first invocation can fail before everything is installed
-slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
-EXIT_CODE=0
-slackpkg -default_answer=yes -batch=on install-new || EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
-  exit $EXIT_CODE
-fi
+slackpkg -default_answer=yes -batch=on install-template $template || EXIT_CODE=$?
 
 EXIT_CODE=0
 slackpkg -default_answer=yes -batch=on upgrade-all || EXIT_CODE=$?
@@ -148,10 +138,16 @@ if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
 fi
 
+# seems this is a problem sometimes.
 EXIT_CODE=0
-slackpkg -default_answer=yes -batch=on install rust || EXIT_CODE=$?
+slackpkg -default_answer=yes -batch=on reinstall ca-certificates || EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
+fi
+
+# (Optional) post install step
+if [ -e ./post_install.sh ]; then
+  ./post_install.sh
 fi
 
 find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
@@ -172,5 +168,5 @@ fi
 
 (
   cd /etc
-  ln -sf /usr/share/zoneinfo/Etc/GMT localtime
+  ln -sf /usr/share/zoneinfo/Etc/UTC localtime
 )

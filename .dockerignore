@@ -1,0 +1,2 @@
+# Don't send to daemon as part of docker context
+local_mirrors/*

@@ -1,0 +1,15 @@
+gcc
+gcc-g++
+libgcrypt
+libgpg-error
+make
+ncurses
+guile
+gc
+libffi
+libmpc
+glibc
+kernel-headers
+binutils
+python
+perl

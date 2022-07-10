@@ -1,0 +1,73 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  REPO_NAME: ghcr.io/ErikTempelaarVO
+  MIRROR_URL: http://localhost:3000/
+
+jobs:
+
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        version: ["14.2", "15.0"]
+        arch: [i586, x86_64]
+        multilib: [with_multilib, skip_multilib]
+        template: [ { slackpkg: ios_dev, script: scripts/ios_dev.sh }, { slackpkg: vds_dev, script: scripts/empty_post_install.sh } ]
+        include:
+          - arch: x86_64
+            releasename: slackware64
+          - arch: i586
+            releasename: slackware
+        # Exlude with_multilib for i586, since that makes no sense
+        # Also exclude skip_multilib for x86_64, since multilib is merely a conditional step on top of the template
+        exclude:
+          - arch: i586
+            multilib: with_multilib
+          - arch: x86_64
+            multilib: skip_multilib
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Maximize build space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 30000
+        swap-size-mb: 1024
+        remove-android: 'true'
+    - uses: actions/checkout@v3
+    - name: Cache slackware mirror
+      id: cache-slackware
+      uses: actions/cache@v3
+      with:
+        path: ./local_mirrors/
+        key: slackware:${{ matrix.version }}-${{ matrix.arch }}
+    -  name: Login to GitHub Container Registry
+       uses: docker/login-action@v2
+       with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build the base tar
+      if: steps.cache-slackware.outputs.cache-hit != 'true'
+      run: docker run --privileged --rm -e RELEASENAME=${{ matrix.releasename }} -e ARCH=${{ matrix.arch }} -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
+    - name: Build, tag and push the base image
+      if: steps.cache-slackware.outputs.cache-hit != 'true'
+      run: docker buildx build --tag ${{ env.REPO_NAME }}/${{ matrix.releasename }}-${{ matrix.version }}-base --file ${{ matrix.releasename }}-${{ matrix.version}}/Dockerfile --push --no-cache .
+    - name: Sync local mirrors
+      run: bash scripts/sync_local_mirror.sh ${{ matrix.releasename }}-${{ matrix.version }}
+    - name: Run local mirror
+      run: docker run -d --rm -v "$(pwd)/local_mirrors/${{ matrix.releasename }}-${{ matrix.version }}:/usr/share/nginx/html:ro" -p 3000:80 --name mirror nginx:alpine
+    - name: Build, tag and push the templated image
+      run: docker buildx build -f template-${{ matrix.version }}/Dockerfile --network=host --tag ${{ env.REPO_NAME }}/${{ matrix.releasename }}-${{ matrix.version }}-${{ matrix.template.slackpkg }} --build-arg base_image=${{ env.REPO_NAME }}/${{ matrix.releasename }}-${{ matrix.version }}-base --build-arg mirror=${{ env.MIRROR_URL }} --build-arg template=${{ matrix.template.slackpkg }} --build-arg post_install=${{ matrix.template.script }} --push --no-cache .
+    - name: Build, tag and push the multilib image
+      if: ${{ matrix.multilib == 'with_multilib' }}
+      run: docker buildx build -f slackware64-${{ matrix.version }}-multilib/Dockerfile --network=host --tag ${{ env.REPO_NAME }}/${{ matrix.releasename }}-${{ matrix.version }}-${{ matrix.template.slackpkg }}-multilib --build-arg base_image=${{ env.REPO_NAME }}/${{ matrix.releasename }}-${{ matrix.version }}-${{ matrix.template.slackpkg }} --build-arg mirror=${{ env.MIRROR_URL }} --push  --no-cache .
+    - name: Stop the local mirror
+      run: docker container stop mirror
