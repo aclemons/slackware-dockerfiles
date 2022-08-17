@@ -59,10 +59,12 @@ RUN \
 
 RUN \
     sed -i 's/^#\(ftp:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors && \
+    sed -i 's/^ftp:/http:/' /etc/slackpkg/mirrors && \
     slackpkg -default_answer=yes -batch=on update && \
     slackpkg -default_answer=yes -batch=on upgrade slackpkg && \
     mv /etc/slackpkg/mirrors.new /etc/slackpkg/mirrors && \
     sed -i 's/^#\(ftp:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors && \
+    sed -i 's/^ftp:/http:/' /etc/slackpkg/mirrors && \
     slackpkg -default_answer=yes -batch=on update && \
     slackpkg -default_answer=yes -batch=on upgrade-all && \
     find / -xdev -type f -name "*.new" -exec rename ".new" "" {} + && \
