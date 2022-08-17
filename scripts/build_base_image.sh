@@ -31,6 +31,36 @@ git clone https://github.com/vbatts/slackware-container.git
 cd slackware-container
 git checkout ba93a9dc82270a90d19abefda0019d7e607183ea
 
+cat << 'EOF' | patch -p1
+diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
+index b71af3e..88bfd98 100755
+--- a/mkimage-slackware.sh
++++ b/mkimage-slackware.sh
+@@ -167,9 +167,6 @@ done
+ cd mnt
+ set -x
+ touch etc/resolv.conf
+-echo "export TERM=linux" >> etc/profile.d/term.sh
+-chmod +x etc/profile.d/term.sh
+-echo ". /etc/profile" > .bashrc
+ echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
+ sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
+ sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
+@@ -207,12 +204,8 @@ chroot_slackpkg() {
+ }
+ chroot_slackpkg
+ 
+-# now some cleanup of the minimal image
+ set +x
+ rm -rf var/lib/slackpkg/*
+-rm -rf usr/share/locale/*
+-rm -rf usr/man/*
+-find usr/share/terminfo/ -type f ! -name 'linux' -a ! -name 'xterm' -a ! -name 'screen.linux' -exec rm -f "{}" \;
+ umount $ROOTFS/dev
+ rm -f dev/* # containers should expect the kernel API (`mount -t devtmpfs none /dev`)
+ umount etc/resolv.conf
+EOF
+
 RELEASENAME=${RELEASENAME:-}
 ARCH=${ARCH:-}
 VERSION=${VERSION:-}
