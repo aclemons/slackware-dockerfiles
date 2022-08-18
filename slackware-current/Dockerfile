@@ -1,4 +1,4 @@
- FROM scratch as slackware-386
+FROM scratch as slackware-386
 ENTRYPOINT ["linux32"]
 ADD slackware-current.tar /
 
