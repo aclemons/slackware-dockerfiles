@@ -38,8 +38,11 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN \
     wget --quiet https://slackware.uk/slackwarearm/slackwarearm-15.0/slackware/ap/diffutils-3.8-arm-1.txz && \
     wget --quiet https://slackware.uk/slackwarearm/slackwarearm-15.0/slackware/ap/diffutils-3.8-arm-1.txz.asc && \
+    wget --quiet https://slackware.uk/slackwarearm/slackwarearm-15.0/slackware/l/libseccomp-2.5.3-arm-1.txz && \
+    wget --quiet https://slackware.uk/slackwarearm/slackwarearm-15.0/slackware/l/libseccomp-2.5.3-arm-1.txz.asc && \
     gpg --verify diffutils-3.8-arm-1.txz.asc diffutils-3.8-arm-1.txz && \
-    rm diffutils-3.8-arm-1.txz.asc
+    gpg --verify libseccomp-2.5.3-arm-1.txz.asc libseccomp-2.5.3-arm-1.txz && \
+    rm diffutils-3.8-arm-1.txz.asc libseccomp-2.5.3-arm-1.txz.asc
 
 FROM scratch as slackware-arm
 
