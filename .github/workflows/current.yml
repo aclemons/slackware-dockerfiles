@@ -11,12 +11,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Fetch ChangeLog
+        run: |
+          curl -s -f -o slackware-current/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-current/ChangeLog.txt
+          curl -s -f -o slackware-current/ChangeLog.txt.amd64 https://slackware.osuosl.org/slackware64-current/ChangeLog.txt
+
       - name: Cache Docker Builds
-        id: cache-dockerbuild
+        id: cache-base-tarball
         uses: actions/cache@v3
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-dockerbuild-current
+          path: |
+            /tmp/.buildx-cache
+            base_tarballs/
+          key: ${{ runner.os }}-dockerbuild-current-${{ hashFiles('**/slackware-current/*', '**/scripts/*') }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -33,12 +40,18 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build prerequisites
+        if: steps.cache-base-tarball.outputs.cache-hit != 'true'
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=current -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=current -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
+          cp *.tar base_tarballs/
+
+      - name: Build prerequisites
+        if: steps.cache-base-tarball.outputs.cache-hit == 'true'
+        run: |
+          cp base_tarballs/*tar .
 
       - name: Build and push
-        id: docker_build
         uses: docker/build-push-action@v3
         with:
           push: true
