@@ -39,8 +39,11 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN \
     wget --quiet https://slackware.uk/slackwarearm/slackwareaarch64-current/slackware/ap/diffutils-3.8-aarch64-1.txz && \
     wget --quiet https://slackware.uk/slackwarearm/slackwareaarch64-current/slackware/ap/diffutils-3.8-aarch64-1.txz.asc && \
+    wget --quiet https://slackware.uk/slackwarearm/slackwareaarch64-current/slackware/l/libseccomp-2.5.4-aarch64-1.txz && \
+    wget --quiet https://slackware.uk/slackwarearm/slackwareaarch64-current/slackware/l/libseccomp-2.5.4-aarch64-1.txz.asc && \
     gpg --verify diffutils-3.8-aarch64-1.txz.asc diffutils-3.8-aarch64-1.txz && \
-    rm diffutils-3.8-aarch64-1.txz.asc
+    gpg --verify libseccomp-2.5.4-aarch64-1.txz.asc libseccomp-2.5.4-aarch64-1.txz && \
+    rm diffutils-3.8-aarch64-1.txz.asc libseccomp-2.5.4-aarch64-1.txz.asc
 
 FROM scratch as slackware-arm64
 
@@ -55,7 +58,10 @@ RUN \
     rm /tmp/* && \
     sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf && \
     sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf && \
-    sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf
+    sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf && \
+    sed -i 's/^#\(https:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors
 
 ARG TARGETARCH=
 FROM slackware-$TARGETARCH
+
+RUN touch /var/lib/slackpkg/current
