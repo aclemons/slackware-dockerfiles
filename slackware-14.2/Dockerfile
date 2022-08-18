@@ -21,9 +21,8 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 WORKDIR /tmp/miniroot
 
 # download, verify and unpack the slackwaream miniroot
+COPY slackware-14.2/slackarm-14.2-miniroot_details.txt* ./
 RUN \
-    wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-14.2-miniroot_details.txt && \
-    wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-14.2-miniroot_details.txt.asc && \
     gpg --verify slackarm-14.2-miniroot_details.txt.asc slackarm-14.2-miniroot_details.txt && \
     tarball="$(sed -n '/slackarm-14.2-miniroot_/p' slackarm-14.2-miniroot_details.txt | awk '{ print $2 }')" && \
     wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$tarball" && \

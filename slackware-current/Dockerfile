@@ -20,10 +20,9 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 WORKDIR /tmp/miniroot
 
-# download, verify and unpack the slackwaream miniroot
+# download, verify and unpack the slackaarch64 miniroot
+COPY slackware-current/slackaarch64-current-miniroot_details.txt* ./
 RUN \
-    wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt && \
-    wget --quiet https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt.asc && \
     gpg --verify slackaarch64-current-miniroot_details.txt.asc slackaarch64-current-miniroot_details.txt && \
     tarball="$(sed -n '/slackaarch64-current-miniroot_/p' slackaarch64-current-miniroot_details.txt | awk '{ print $2 }')" && \
     wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$tarball" && \

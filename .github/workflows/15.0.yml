@@ -23,7 +23,7 @@ jobs:
           path: |
             /tmp/.buildx-cache
             base_tarballs/
-          key: ${{ runner.os }}-dockerbuild-15.0-${{ hashFiles('**/slackware-15.0/*', '**/scripts/*') }}
+          key: ${{ runner.os }}-dockerbuild-15.0-${{ hashFiles('**/slackware-15.0/ChangeLog*', '**/scripts/*') }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -39,6 +39,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Fetch Miniroot details
+        run: |
+          curl -s -f -o slackware-15.0/slackarm-15.0-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-15.0-miniroot_details.txt
+          curl -s -f -o slackware-15.0/slackarm-15.0-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-15.0-miniroot_details.txt.asc
+
       - name: Build prerequisites
         if: steps.cache-base-tarball.outputs.cache-hit != 'true'
         run: |
@@ -46,7 +51,7 @@ jobs:
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=15.0 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           cp *.tar base_tarballs/
 
-      - name: Build prerequisites
+      - name: Restore prerequisites
         if: steps.cache-base-tarball.outputs.cache-hit == 'true'
         run: |
           cp base_tarballs/*tar .
