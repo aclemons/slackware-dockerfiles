@@ -53,7 +53,7 @@ node('master') {
                 docker.image('nginx:alpine').withRun("-v ${localMirror}:/usr/share/nginx/html/${version}:ro -p 80") { c ->
                     def localPort = sh(script: "#!/bin/bash -e\ndocker port ${c.id} 80 | cut -d: -f2", returnStdout: true).trim()
 
-                    args = "${args} --build-arg mirror=http://localhost:${localPort}/${version}/ --network=host"
+                    args = "${args} --build-arg mirror=http://localhost:${localPort}/${version}/ --network=host --platform ${env.BUILD_PLATFORM}"
 
                     docker.build(env.DOCKER_IMAGE, "${args} .")
                 }
