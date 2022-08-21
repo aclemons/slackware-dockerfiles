@@ -11,19 +11,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Fetch ChangeLog
+      - name: Fetch x86 ChangeLogs
         run: |
           curl -s -f -o slackware-current/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-current/ChangeLog.txt
           curl -s -f -o slackware-current/ChangeLog.txt.amd64 https://slackware.osuosl.org/slackware64-current/ChangeLog.txt
 
-      - name: Cache Docker Builds
-        id: cache-base-tarball
+      - name: Cache Base Tarballs
+        id: cache-base-tarballs
         uses: actions/cache@v3
         with:
-          path: |
-            /tmp/.buildx-cache
-            base_tarballs/
-          key: ${{ runner.os }}-dockerbuild-current-${{ hashFiles('**/slackware-current/ChangeLog*', '**/scripts/*') }}
+          path: base_tarballs/
+          key: ${{ runner.os }}-base-tarballs-current-${{ hashFiles('**/slackware-current/ChangeLog*', '**/scripts/build_base_image.sh') }}
+
+      - name: Cache Docker Builds
+        id: cache-docker-build
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-dockerbuild-current
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -39,22 +44,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Fetch Miniroot details
-        run: |
-          curl -s -f -o slackware-current/slackaarch64-current-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt
-          curl -s -f -o slackware-current/slackaarch64-current-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt.asc
-
       - name: Build prerequisites
-        if: steps.cache-base-tarball.outputs.cache-hit != 'true'
+        if: steps.cache-base-tarballs.outputs.cache-hit != 'true'
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=current -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=current -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           cp *.tar base_tarballs/
 
       - name: Restore prerequisites
-        if: steps.cache-base-tarball.outputs.cache-hit == 'true'
+        if: steps.cache-base-tarballs.outputs.cache-hit == 'true'
         run: |
           cp base_tarballs/*tar .
+
+      - name: Fetch Arm ChangeLog
+        run: |
+          curl -s -f -o slackware-current/ChangeLog.txt.arm https://slackware.uk/slackwarearm/slackwareaarch64-current/ChangeLog.txt
+
+      - name: Fetch Miniroot details
+        run: |
+          curl -s -f -o slackware-current/slackaarch64-current-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt
+          curl -s -f -o slackware-current/slackaarch64-current-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt.asc
 
       - name: Build and push
         uses: docker/build-push-action@v3

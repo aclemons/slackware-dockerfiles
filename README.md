@@ -61,6 +61,8 @@ To build a Slackware64-current full image:
 
 To build a Slackwarearm-14.2 full image:
 
+    $ curl -s -f -o slackware-14.2/slackarm-14.2-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-14.2-miniroot_details.txt
+    $ curl -s -f -o slackware-14.2/slackarm-14.2-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-14.2-miniroot_details.txt.asc
     $ docker buildx build --platform linux/arm/v5 -t aclemons/slackware:14.2-base-arm -f slackware-14.2/Dockerfile --load .
     $ bash scripts/sync_local_mirror.sh slackwarearm-14.2
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-14.2:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
@@ -69,6 +71,8 @@ To build a Slackwarearm-14.2 full image:
 
 To build a Slackwarearm-15.0 full image:
 
+    $ curl -s -f -o slackware-15.0/slackarm-15.0-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-15.0-miniroot_details.txt
+    $ curl -s -f -o slackware-15.0/slackarm-15.0-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-15.0-miniroot_details.txt.asc
     $ docker buildx build --platform linux/arm/v7 -t aclemons/slackware:15.0-base-arm -f slackware-15.0/Dockerfile --load .
     $ bash scripts/sync_local_mirror.sh slackwarearm-15.0
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwarearm-15.0:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine
@@ -77,6 +81,8 @@ To build a Slackwarearm-15.0 full image:
 
 To build a Slackwareaarch64-current full image:
 
+    $ curl -s -f -o slackware-current/slackaarch64-current-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt
+    $ curl -s -f -o slackware-current/slackaarch64-current-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackaarch64-current-miniroot_details.txt.asc
     $ docker buildx build --platform linux/arm64/v8 -t aclemons/slackware:current-base-arm -f slackware-current/Dockerfile --load .
     $ bash scripts/sync_local_mirror.sh slackwareaarch64-current
     $ docker run -d --rm -v "$(pwd)/local_mirrors/slackwareaarch64-current:/usr/share/nginx/html:ro" -p 3000:80 nginx:alpine

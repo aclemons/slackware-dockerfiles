@@ -20,6 +20,10 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 WORKDIR /tmp/miniroot
 
+# We download this outside of the docker build and copy it into the image so we
+# can set this build on a timer and have the cache invalidated when the miniroot
+# changes.
+
 # download, verify and unpack the slackaarch64 miniroot
 COPY slackware-current/slackaarch64-current-miniroot_details.txt* ./
 RUN \
@@ -53,8 +57,15 @@ COPY slackware-current/GPG-KEY /tmp/
 
 RUN \
     upgradepkg --install-new /tmp/*.txz && \
-    gpg --import /tmp/GPG-KEY* && \
-    rm /tmp/* && \
+    gpg --import /tmp/GPG-KEY && \
+    rm /tmp/*
+
+# As above, this will invalidate the cached layer when the ChangeLog is updated
+# and we will only rebuild from below.
+COPY slackware-current/ChangeLog.txt.arm /tmp
+
+RUN \
+    rm /tmp/ChangeLog* && \
     sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf && \
     sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf && \
     sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf && \
