@@ -75,3 +75,4 @@ ARG TARGETARCH=
 FROM slackware-$TARGETARCH
 
 RUN touch /var/lib/slackpkg/current
+CMD ["bash"]

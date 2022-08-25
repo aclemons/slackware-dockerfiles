@@ -73,3 +73,4 @@ RUN \
 
 ARG TARGETARCH=
 FROM slackware-$TARGETARCH
+CMD ["bash"]
