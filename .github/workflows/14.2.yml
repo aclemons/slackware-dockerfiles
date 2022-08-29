@@ -30,7 +30,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-dockerbuild-14.2
+          key: ${{ runner.os }}-dockerbuild-14.2-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-dockerbuild-14.2
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

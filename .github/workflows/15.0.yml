@@ -30,7 +30,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-dockerbuild-15.0
+          key: ${{ runner.os }}-dockerbuild-15.0-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-dockerbuild-15.2
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -136,7 +138,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/changelogs
-          key: ${{ runner.os }}-dockerbuild-15.0-full
+          key: ${{ runner.os }}-dockerbuild-15.0-full-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-dockerbuild-15.0-full
 
       - name: Check status after cache hit
         if: steps.cache-changelogs.outputs.cache-hit == 'true'
