@@ -1,6 +1,8 @@
 name: Slackware 14.2 Docker Images
 
 on:
+  schedule:
+    - cron: '0 3 * * *'
   push:
     branches:
       - 'master'
