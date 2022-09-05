@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Copyright 2019-2022 Andrew Clemons, Wellington New Zealand
+# Copyright 2022 Andrew Clemons, Tokyo Japan
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -24,16 +25,14 @@ set -e
 set -o pipefail
 
 configure_current() {
-  local image="$1"
-
-  if echo "$image" | grep ':current' > /dev/null 2>&1 ; then
+  # PRETTY_NAME="Slackware 14.2 arm (post 14.2 -current)"
+  if sed -n '/^PRETTY_NAME/p' /etc/os-release | grep post > /dev/null 2>&1 ; then
     touch /var/lib/slackpkg/current
   fi
 }
 
 configure_slackpkg() {
   local mirror="$1"
-  local image="$2"
 
   if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null 2>&1 ; then
     if [ ! -e /usr/lib64 ] ; then
@@ -42,16 +41,6 @@ configure_slackpkg() {
   fi
 
   sed -i 's/^\(WGETFLAGS="\)\(.*\)$/\1--quiet \2/' /etc/slackpkg/slackpkg.conf
-
-  if ! grep ^h /etc/slackpkg/mirrors > /dev/null 2>&1 ; then
-    if [ "$image" = "aclemons/slackware:current-x86_64-base" ] ; then
-      echo "http://slackware.uk/slackware/slackware64-current/" >> /etc/slackpkg/mirrors
-    elif [ "$image" = "aclemons/slackware:current-x86-base" ] ; then
-      echo "http://slackware.uk/slackware/slackware-current/" >> /etc/slackpkg/mirrors
-    elif [ "$image" = "aclemons/slackware:current-arm-base" ] ; then
-      echo "http://slackware.uk/slackwarearm/slackwarearm-current/" >> /etc/slackpkg/mirrors
-    fi
-  fi
 
   if [ -n "$mirror" ] ; then
     echo "Configuring mirror to: $mirror"
@@ -67,13 +56,10 @@ configure_slackpkg() {
 # terse package install for installpkg
 export TERSE=0
 
-base_image="$1"
-mirror="$2"
+mirro="$1"
 
-echo "Using base_image=$base_image, mirror=$mirror"
-
-configure_current "$base_image"
-configure_slackpkg "$mirror" "$base_image"
+configure_current
+configure_slackpkg "$mirror"
 
 slackpkg -default_answer=yes -batch=on update
 
@@ -83,7 +69,7 @@ if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
 fi
 
-configure_current "$base_image"
+configure_current
 
 if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
   mv /etc/slackpkg/slackpkg.conf.new /etc/slackpkg/slackpkg.conf
@@ -96,7 +82,7 @@ if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
     mv /etc/slackpkg/blacklist.new /etc/slackpkg/blacklist
   fi
 
-  configure_slackpkg "$mirror" "$base_image"
+  configure_slackpkg "$mirror"
 fi
 
 # slackpkg tty fixes
@@ -105,7 +91,7 @@ sed -i 's,SIZE=\$( stty size )$,SIZE=$( [[ $- != *i* ]] \&\& stty size || echo "
 
 slackpkg -default_answer=yes -batch=on update
 
-if echo "$image" | grep ':current' > /dev/null 2>&1 ; then
+if sed -n '/^PRETTY_NAME/p' /etc/os-release | grep post > /dev/null 2>&1 ; then
   EXIT_CODE=0
   slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl || EXIT_CODE=$?
 
@@ -159,7 +145,7 @@ find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 rm -rf /var/cache/packages/*
 rm -rf /var/lib/slackpkg/*
 
-configure_current "$base_image"
+configure_current
 
 # slackpkg tty fixes
 # shellcheck disable=SC2016
