@@ -144,9 +144,16 @@ jobs:
       - name: Check status after cache miss
         if: steps.cache-changelogs.outputs.cache-hit != 'true'
         run: |
-          echo "BUILD_IMAGE=1" >> $GITHUB_ENV
+          # the miss could just be a hit on a fallback
           mkdir -p /tmp/changelogs
-          printf "%s\n" "${{ hashFiles('**/slackware-15.0/ChangeLog*', '**/scripts/install_all.sh', 'Dockerfile') }}" > /tmp/changelogs/key
+          printf "%s\n" "${{ hashFiles('**/slackware-15.0/ChangeLog*', '**/scripts/install_all.sh', 'Dockerfile') }}" > /tmp/changelogs/newkey
+          touch /tmp/changelogs/key
+          if diff /tmp/changelogs/newkey /tmp/changelogs/key > /dev/null ; then
+            echo "BUILD_IMAGE=0" >> $GITHUB_ENV
+          else
+            echo "BUILD_IMAGE=1" >> $GITHUB_ENV
+          fi
+          mv /tmp/changelogs/newkey /tmp/changelogs/key
 
       - name: Rsync repo
         if: ${{ env.BUILD_IMAGE }}
