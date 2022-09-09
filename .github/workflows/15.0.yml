@@ -156,7 +156,7 @@ jobs:
           mv /tmp/changelogs/newkey /tmp/changelogs/key
 
       - name: Rsync repo
-        if: ${{ env.BUILD_IMAGE }}
+        if: env.BUILD_IMAGE == '1'
         run: |
           bash scripts/sync_local_mirror.sh slackware64-15.0
 
@@ -165,7 +165,7 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v3
-        if: ${{ env.BUILD_IMAGE }}
+        if: env.BUILD_IMAGE == '1'
         with:
           push: true
           platforms: linux/amd64
