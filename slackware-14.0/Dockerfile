@@ -1,9 +1,9 @@
 FROM scratch as slackware-386
 ENTRYPOINT ["linux32"]
-ADD slackware-14.2.tar /
+ADD slackware-14.0.tar /
 
 FROM scratch as slackware-amd64
-ADD slackware64-14.2.tar /
+ADD slackware64-14.0.tar /
 
 # hadolint ignore=DL3029
 FROM --platform=linux/arm/v6 alpine:3.15 as arm-builder
@@ -14,7 +14,7 @@ FROM --platform=linux/arm/v6 alpine:3.15 as arm-builder
 # hadolint ignore=DL3018
 RUN apk add --no-cache wget gpg gpg-agent binutils bash
 
-COPY slackware-14.2/GPG-KEY /tmp/GPG-KEY
+COPY slackware-14.0/GPG-KEY /tmp/GPG-KEY
 RUN gpg --import /tmp/GPG-KEY && rm /tmp/GPG-KEY
 
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
@@ -26,13 +26,13 @@ WORKDIR /tmp/miniroot
 # changes.
 
 # download, verify and unpack the slackwaream miniroot
-COPY slackware-14.2/slackarm-14.2-miniroot_details.txt* ./
+COPY slackware-14.0/slackarm-14.0-miniroot_details.txt* ./
 RUN \
-    gpg --verify slackarm-14.2-miniroot_details.txt.asc slackarm-14.2-miniroot_details.txt && \
-    tarball="$(sed -n '/slackarm-14.2-miniroot_/p' slackarm-14.2-miniroot_details.txt | awk '{ print $2 }')" && \
+    gpg --verify slackarm-14.0-miniroot_details.txt.asc slackarm-14.0-miniroot_details.txt && \
+    tarball="$(sed -n '/slackarm-14.0-miniroot_/p' slackarm-14.0-miniroot_details.txt | awk '{ print $2 }')" && \
     wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/$tarball" && \
-    sed -n '/miniroot_/p' slackarm-14.2-miniroot_details.txt | sed 's/^[[:space:]]*//' | sha1sum -c - && \
-    rm slackarm-14.2-miniroot_details.txt* && \
+    sed -n '/miniroot_/p' slackarm-14.0-miniroot_details.txt | sed 's/^[[:space:]]*//' | sha1sum -c - && \
+    rm slackarm-14.0-miniroot_details.txt* && \
     tar -xf "$tarball" && rm "$tarball"
 
 # fetch some packages required to run slackpkg
@@ -41,9 +41,9 @@ WORKDIR /tmp/pkgs
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN \
-    for package in ap/diffutils-3.3-arm-2.txz n/gnupg-1.4.20-arm-1.txz l/libunistring-0.9.3-arm-2.txz ; do \
-      wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-14.2/slackware/$package" ; \
-      wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-14.2/slackware/$package.asc" ; \
+    for package in slackware/ap/diffutils-3.2-arm-1.tgz slackware/n/gnupg-1.4.12-arm-1.tgz patches/packages/slackpkg-2.82.0-noarch-4_slack14.0.txz ; do \
+      wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-14.0/$package" ; \
+      wget --quiet "https://slackware.uk/slackwarearm/slackwarearm-14.0/$package.asc" ; \
       package=${package##*/} ; \
       gpg --verify "$package.asc" "$package" ; \
       rm "$package.asc" ; \
@@ -52,28 +52,22 @@ RUN \
 FROM scratch as slackware-arm
 
 COPY --from=arm-builder /tmp/miniroot/. /
-COPY --from=arm-builder /tmp/pkgs/*.txz /tmp/
+COPY --from=arm-builder /tmp/pkgs/*.t?z /tmp/
 
-COPY slackware-14.2/GPG-KEY /tmp/
+COPY slackware-14.0/GPG-KEY /tmp/
 
 RUN \
-    upgradepkg --install-new /tmp/*.txz && \
+    upgradepkg --install-new /tmp/*.t?z && \
     gpg --import /tmp/GPG-KEY && \
     rm /tmp/*
 
 # As above, this will invalidate the cached layer when the ChangeLog is updated
 # and we will only rebuild from below.
-COPY slackware-14.2/ChangeLog.txt.arm /tmp
+COPY slackware-14.0/ChangeLog.txt.arm /tmp
 
 RUN \
     rm /tmp/ChangeLog* && \
-    sed -i 's/^#\(ftp:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors && \
-    sed -i 's/^ftp:/http:/' /etc/slackpkg/mirrors && \
-    slackpkg -default_answer=yes -batch=on update && \
-    slackpkg -default_answer=yes -batch=on upgrade slackpkg && \
-    mv /etc/slackpkg/mirrors.new /etc/slackpkg/mirrors && \
-    sed -i 's/^#\(ftp:\/\/slackware.uk\)/\1/' /etc/slackpkg/mirrors && \
-    sed -i 's/^ftp:/http:/' /etc/slackpkg/mirrors && \
+    sed -i '/slackwarearm-14.0/s/^\(#ftp:\/\/ftp.arm.slackware.com.*\)/\1\nhttp:\/\/slackware.uk\/slackwarearm\/slackwarearm-14.0\//' /etc/slackpkg/mirrors && \
     slackpkg -default_answer=yes -batch=on update && \
     slackpkg -default_answer=yes -batch=on upgrade-all && \
     find / -xdev -type f -name "*.new" -exec rename ".new" "" {} + && \
@@ -83,5 +77,6 @@ RUN \
     sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf
 
 ARG TARGETARCH=
+# hadolint ignore=DL3006
 FROM slackware-$TARGETARCH
 CMD ["bash"]

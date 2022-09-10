@@ -5,6 +5,7 @@ ADD slackware-14.1.tar /
 FROM scratch as slackware-amd64
 ADD slackware64-14.1.tar /
 
+# hadolint ignore=DL3029
 FROM --platform=linux/arm/v6 alpine:3.15 as arm-builder
 
 # Use a simple alpine image to download and verify the pieces we need to create
