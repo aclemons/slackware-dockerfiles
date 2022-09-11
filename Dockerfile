@@ -4,5 +4,5 @@ FROM $base_image
 
 COPY scripts/install_all.sh /
 
-ARG mirror
-RUN bash /install_all.sh "$mirror" && rm /install_all.sh
+ARG mirror_base
+RUN bash /install_all.sh "$mirror_base" && rm /install_all.sh

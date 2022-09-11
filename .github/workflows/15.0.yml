@@ -168,12 +168,12 @@ jobs:
         if: env.BUILD_IMAGE == '1'
         with:
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/386
           cache-from: type=registry,ref=${{ github.repository_owner }}/slackware:latest-full
           cache-to: type=inline
           build-args: |
             base_image=aclemons/slackware:15.0-base
-            mirror=http://localhost:3000/slackware64-15.0/
+            mirror_base=http://localhost:3000
           network: host
           context: .
           file: Dockerfile

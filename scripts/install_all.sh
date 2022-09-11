@@ -32,7 +32,18 @@ configure_current() {
 }
 
 configure_slackpkg() {
-  local mirror="$1"
+  local mirror_base="$1"
+
+  # TODO - very fragile - arm has ARCH set in the slackpkg config
+  if grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null 2>&1 ; then
+    mirror="$mirror_base/slackwarearm-15.0/"
+  else
+    if [ -e /usr/lib64 ] ; then
+      mirror="$mirror_base/slackware64-15.0/"
+    else
+      mirror="$mirror_base/slackware-15.0/"
+    fi
+  fi
 
   if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null 2>&1 ; then
     if [ ! -e /usr/lib64 ] ; then
@@ -56,10 +67,10 @@ configure_slackpkg() {
 # terse package install for installpkg
 export TERSE=0
 
-mirro="$1"
+mirror_base="$1"
 
 configure_current
-configure_slackpkg "$mirror"
+configure_slackpkg "$mirror_base"
 
 slackpkg -default_answer=yes -batch=on update
 
@@ -82,7 +93,7 @@ if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
     mv /etc/slackpkg/blacklist.new /etc/slackpkg/blacklist
   fi
 
-  configure_slackpkg "$mirror"
+  configure_slackpkg "$mirror_base"
 fi
 
 # slackpkg tty fixes
@@ -151,7 +162,7 @@ configure_current
 # shellcheck disable=SC2016
 sed -i 's,SIZE=\$( \[\[ \$- != \*i\* \]\] \&\& stty size || echo "0 0"),SIZE=$( stty size ),' /usr/libexec/slackpkg/functions.d/post-functions.sh
 
-if [ -n "$mirror" ] ; then
+if [ -n "$mirror_base" ] ; then
   sed -i '$d' /etc/slackpkg/mirrors
   sed -i 's/^#xxxh/h/' /etc/slackpkg/mirrors
 fi
