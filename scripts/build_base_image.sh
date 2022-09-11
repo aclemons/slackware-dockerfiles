@@ -33,10 +33,24 @@ git checkout ba93a9dc82270a90d19abefda0019d7e607183ea
 
 cat << 'EOF' | patch -p1
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..88bfd98 100755
+index b71af3e..81d37bc 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
-@@ -167,9 +167,6 @@ done
+@@ -129,7 +129,12 @@ fi
+ 
+ # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
+ root_env=""
+-root_flag="--root /mnt"
++root_flag=""
++if [ -f ./sbin/upgradepkg ] && grep -qw -- '"--root"' ./sbin/upgradepkg ; then
++	root_flag="--root /mnt"
++elif [ -f ./usr/lib/setup/installpkg ] && grep -qw -- '"-root"' ./usr/lib/setup/installpkg ; then
++	root_flag="-root /mnt"
++fi
+ if [ "$VERSION" = "current" ] || [ "${VERSION}" = "15.0" ]; then
+ 	root_env='ROOT=/mnt'
+ 	root_flag=''
+@@ -167,9 +172,6 @@ done
  cd mnt
  set -x
  touch etc/resolv.conf
@@ -46,7 +60,7 @@ index b71af3e..88bfd98 100755
  echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
  sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
  sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
-@@ -207,12 +204,8 @@ chroot_slackpkg() {
+@@ -207,12 +209,8 @@ chroot_slackpkg() {
  }
  chroot_slackpkg
  
