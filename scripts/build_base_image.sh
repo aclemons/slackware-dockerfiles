@@ -33,7 +33,7 @@ git checkout ba93a9dc82270a90d19abefda0019d7e607183ea
 
 cat << 'EOF' | patch -p1
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..81d37bc 100755
+index b71af3e..c392e16 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -129,7 +129,12 @@ fi
@@ -50,19 +50,34 @@ index b71af3e..81d37bc 100755
  if [ "$VERSION" = "current" ] || [ "${VERSION}" = "15.0" ]; then
  	root_env='ROOT=/mnt'
  	root_flag=''
-@@ -167,9 +172,6 @@ done
+@@ -167,13 +172,12 @@ done
  cd mnt
  set -x
  touch etc/resolv.conf
 -echo "export TERM=linux" >> etc/profile.d/term.sh
 -chmod +x etc/profile.d/term.sh
 -echo ". /etc/profile" > .bashrc
- echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
- sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
- sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
-@@ -207,12 +209,8 @@ chroot_slackpkg() {
+-echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
+-sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
+-sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
+-sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
++if [ -e etc/slackpkg/mirrors ] ; then
++  echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
++  sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
++  sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
++  sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
++fi
+ 
+ if [ ! -f etc/rc.d/rc.local ] ; then
+ 	mkdir -p etc/rc.d
+@@ -205,14 +209,12 @@ chroot_slackpkg() {
+ 		return $?
+ 	fi
  }
- chroot_slackpkg
+-chroot_slackpkg
++if [ -e etc/slackpkg/mirrors ] ; then
++  chroot_slackpkg
++fi
  
 -# now some cleanup of the minimal image
  set +x
