@@ -5,8 +5,10 @@ ADD slackware-12.1.tar /
 COPY slackware-12.1/GPG-KEY /tmp
 RUN gpg --import /tmp/GPG-KEY && rm /tmp/GPG-KEY
 
+# hadolint ignore=DL3003
 RUN \
     mkdir -p /tmp/patches && \
+    cd /tmp/patches && \
     wget -q http://slackware.uk/slackware/slackware-12.1/slackware/n/rsync-3.0.2-i486-1.tgz && \
     wget -q http://slackware.uk/slackware/slackware-12.1/slackware/n/rsync-3.0.2-i486-1.tgz.asc && \
     wget -q http://slackware.uk/slackware/slackware-12.1/extra/slackpkg/slackpkg-2.70.3-noarch-2.tgz && \
@@ -32,7 +34,7 @@ RUN \
     rm -rf /tmp/patches/ && \
     find / -xdev -type f -name "*.new" -exec rename ".new" "" {} + && \
     rm -rf /var/cache/packages/* && rm -rf /var/lib/slackpkg/* && \
-    echo "https://slackware.osuosl.org/slackware-12.1/" && \
+    echo "http://slackware.osuosl.org/slackware-12.1/" >> /etc/slackpkg/mirrors && \
     sed -i 's/DIALOG=on/DIALOG=off/' /etc/slackpkg/slackpkg.conf && \
     sed -i 's/POSTINST=on/POSTINST=off/' /etc/slackpkg/slackpkg.conf && \
     sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf
