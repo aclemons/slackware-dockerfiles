@@ -52,6 +52,8 @@ FROM scratch as slackware-arm
 
 COPY --from=arm-builder /tmp/miniroot/. /
 COPY --from=arm-builder /tmp/pkgs/*.txz /tmp/
+# hadolint ignore=DL3022
+COPY --from=ubuntu:21.04 /lib/arm-linux-gnueabihf/libc-2.33.so /lib/
 
 COPY slackware-15.0/GPG-KEY /tmp/
 
