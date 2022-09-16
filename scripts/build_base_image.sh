@@ -55,7 +55,7 @@ index a86fdf6..c3052a1 100755
      tmp_file_list="${tmp_dir}/FILE_LIST"
      _fetch_file_list "${mirror}" "${release}" > "${tmp_file_list}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..616e0a4 100755
+index b71af3e..00cb0c5 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -15,7 +15,13 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
@@ -153,16 +153,36 @@ index b71af3e..616e0a4 100755
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -191,6 +214,8 @@ mount --bind /etc/resolv.conf etc/resolv.conf
+@@ -191,28 +214,38 @@ mount --bind /etc/resolv.conf etc/resolv.conf
  # for slackware 15.0, slackpkg return codes are now:
  # 0 -> All OK, 1 -> something wrong, 20 -> empty list, 50 -> Slackpkg upgraded, 100 -> no pending updates
  chroot_slackpkg() {
-+  PATH=/bin:/sbin:/usr/bin:/usr/sbin \
-+  chroot . /bin/bash -c '/sbin/ldconfig'
++	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++	chroot . /bin/bash -c '/sbin/ldconfig'
  	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
++	chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade slackpkg || true'
++	if [ -e etc/slackpkg/mirrors.new ] ; then
++		mv etc/slackpkg/mirrors.new etc/slackpkg/mirrors
++		echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
++	fi
++	if [ -e etc/slackpkg/slackpkg.conf.new ] ; then
++		mv etc/slackpkg/slackpkg.conf.new etc/slackpkg/slackpkg.conf
++		sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
++		sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
++		sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
++	fi
++	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
  	ret=0
-@@ -205,14 +230,12 @@ chroot_slackpkg() {
+ 	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
+ 	chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade-all' || ret=$?
+ 	if [ $ret -eq 0 ] || [ $ret -eq 20 ] ; then
+-		echo "uprade-all is OK"
++		echo "upgrade-all is OK"
+ 		return
+-	elif [ $ret -eq 50 ] ; then
+-		chroot_slackpkg
+ 	else
  		return $?
  	fi
  }
