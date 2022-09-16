@@ -1,4 +1,4 @@
-ARG base_image=aclemons/slackware:14.2_x86_64_latest
+ARG base_image=aclemons/slackware:15.0-full
 # hadolint ignore=DL3006
 FROM $base_image
 
