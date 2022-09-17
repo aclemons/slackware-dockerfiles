@@ -55,16 +55,24 @@ index a86fdf6..c3052a1 100755
      tmp_file_list="${tmp_dir}/FILE_LIST"
      _fetch_file_list "${mirror}" "${release}" > "${tmp_file_list}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..b62d525 100755
+index b71af3e..b364e2d 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
-@@ -15,7 +15,13 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
+@@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
+   case "$( uname -m )" in
+     i?86) ARCH="" ;;
+     arm*) ARCH=arm ;;
++ aarch64) ARCH=aarch64 ;;
+        *) ARCH=64 ;;
+   esac
+ fi
+@@ -15,7 +16,13 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
  VERSION=${VERSION:="current"}
  RELEASENAME=${RELEASENAME:-"slackware${ARCH}"}
  RELEASE=${RELEASE:-"${RELEASENAME}-${VERSION}"}
 -MIRROR=${MIRROR:-"http://slackware.osuosl.org"}
 +if [ -z "$MIRROR" ]; then
-+  if [ "$ARCH" = "arm" ] ; then
++  if [ "$ARCH" = "arm" ] || [ "$ARCH" = "aarch64" ] ; then
 +    MIRROR="http://slackware.uk/slackwarearm"
 +  else
 +    MIRROR="http://slackware.osuosl.org"
@@ -73,7 +81,7 @@ index b71af3e..b62d525 100755
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
  CWD=$(pwd)
-@@ -88,16 +94,28 @@ function cacheit() {
+@@ -88,16 +95,29 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -82,9 +90,10 @@ index b71af3e..b62d525 100755
 +  if [ "$ARCH" = "arm" ] ; then
 +    case "$VERSION" in
 +      11*|12*|13*|14.0|14.1) INITRD=initrd-versatile.img ;;
-+      14.2|15.0) INITRD=initrd-armv7.img ;;
-+      *) INITRD=initrd-armv8.img ;;
++      *) INITRD=initrd-armv7.img ;;
 +    esac
++  elif [ "$ARCH" = "aarch64" ] ; then
++    INITRD=initrd-armv8.img
 +  else
 +    INITRD=${INITRD:-initrd.img}
 +  fi
@@ -106,7 +115,7 @@ index b71af3e..b62d525 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -129,15 +147,20 @@ fi
+@@ -129,15 +149,20 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -130,12 +139,12 @@ index b71af3e..b62d525 100755
  fi
  for pkg in ${base_pkgs}
  do
-@@ -165,15 +188,27 @@ do
+@@ -165,15 +190,27 @@ do
  done
  
  cd mnt
 +PATH=/bin:/sbin:/usr/bin:/usr/sbin \
-+chroot . /bin/bash -c '/sbin/ldconfig'
++chroot . /bin/sh -c '/sbin/ldconfig'
 +
 +if [ ! -e ./root/.gnupg ] ; then
 +  cacheit "GPG-KEY"
@@ -165,7 +174,7 @@ index b71af3e..b62d525 100755
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -193,26 +228,34 @@ mount --bind /etc/resolv.conf etc/resolv.conf
+@@ -193,26 +230,34 @@ mount --bind /etc/resolv.conf etc/resolv.conf
  chroot_slackpkg() {
  	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
