@@ -117,6 +117,8 @@ if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
 fi
 
+sed -i 's/DOWNLOAD_ALL=on/DOWNLOAD_ALL=off/' /etc/slackpkg/slackpkg.conf
+
 slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
 # first invocation can fail before everything is installed
 slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
@@ -150,6 +152,8 @@ slackpkg -default_answer=yes -batch=on reinstall ca-certificates || EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
 fi
+
+sed -i 's/DOWNLOAD_ALL=off/DOWNLOAD_ALL=on/' /etc/slackpkg/slackpkg.conf
 
 find / -xdev -type f -name "*.new" -exec rename ".new" "" {} +
 
