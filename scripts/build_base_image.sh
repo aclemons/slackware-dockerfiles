@@ -55,7 +55,7 @@ index a86fdf6..c3052a1 100755
      tmp_file_list="${tmp_dir}/FILE_LIST"
      _fetch_file_list "${mirror}" "${release}" > "${tmp_file_list}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..00cb0c5 100755
+index b71af3e..b62d525 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -15,7 +15,13 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
@@ -130,11 +130,23 @@ index b71af3e..00cb0c5 100755
  fi
  for pkg in ${base_pkgs}
  do
-@@ -165,15 +188,15 @@ do
+@@ -165,15 +188,27 @@ do
  done
  
  cd mnt
-+chroot . /sbin/ldconfig
++PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++chroot . /bin/bash -c '/sbin/ldconfig'
++
++if [ ! -e ./root/.gnupg ] ; then
++  cacheit "GPG-KEY"
++  cp ${CACHEFS}/GPG-KEY .
++  echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++       chroot . /usr/bin/gpg --import GPG-KEY
++  PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++      chroot . /usr/bin/gpg --import GPG-KEY
++ rm GPG-KEY
++fi
++
  set -x
  touch etc/resolv.conf
 -echo "export TERM=linux" >> etc/profile.d/term.sh
@@ -153,12 +165,8 @@ index b71af3e..00cb0c5 100755
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -191,28 +214,38 @@ mount --bind /etc/resolv.conf etc/resolv.conf
- # for slackware 15.0, slackpkg return codes are now:
- # 0 -> All OK, 1 -> something wrong, 20 -> empty list, 50 -> Slackpkg upgraded, 100 -> no pending updates
+@@ -193,26 +228,34 @@ mount --bind /etc/resolv.conf etc/resolv.conf
  chroot_slackpkg() {
-+	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
-+	chroot . /bin/bash -c '/sbin/ldconfig'
  	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
 +	chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade slackpkg || true'
