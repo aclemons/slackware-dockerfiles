@@ -34,10 +34,10 @@ git checkout ba93a9dc82270a90d19abefda0019d7e607183ea
 
 cat << 'EOF' | patch -p1
 diff --git a/get_paths.sh b/get_paths.sh
-index a86fdf6..0ffeeb9 100755
+index a86fdf6..914798c 100755
 --- a/get_paths.sh
 +++ b/get_paths.sh
-@@ -12,7 +12,7 @@ _usage() {
+@@ -12,15 +12,16 @@ _usage() {
  }
  
  _release_base() {
@@ -46,7 +46,39 @@ index a86fdf6..0ffeeb9 100755
  }
  
  _fetch_file_list() {
-@@ -77,7 +77,7 @@ main() {
+     local mirror="${1}"
+     local release="${2}"
++    local directory="${3}"
+     local ret
+ 
+-    curl -sSL "${mirror}/${release}/$(_release_base "${release}")/FILE_LIST"
++    curl -sSL "${mirror}/${release}/${directory}/FILE_LIST"
+     ret=$?
+     if [ $ret -ne 0 ] ; then
+         return $ret
+@@ -59,7 +60,7 @@ main() {
+     mirror="${MIRROR:-http://slackware.osuosl.org}"
+     release="${RELEASE:-slackware64-current}"
+ 
+-    while getopts ":hm:r:t" opts ; do
++    while getopts ":hm:r:tpe" opts ; do
+         case "${opts}" in
+             m)
+                 mirror="${OPTARG}"
+@@ -70,6 +71,12 @@ main() {
+             t)
+                 fetch_tagfiles=1
+                 ;;
++            p)
++                fetch_patches=1
++                ;;
++            e)
++                fetch_extra=1
++                ;;
+             *)
+                 _usage
+                 exit 1
+@@ -77,16 +84,32 @@ main() {
          esac
      done
      shift $((OPTIND-1))
@@ -54,17 +86,39 @@ index a86fdf6..0ffeeb9 100755
 +
      tmp_dir="$(mktemp -d)"
      tmp_file_list="${tmp_dir}/FILE_LIST"
-     _fetch_file_list "${mirror}" "${release}" > "${tmp_file_list}"
-@@ -86,7 +86,7 @@ main() {
-         echo "ERROR fetching FILE_LIST" >&2
-         exit $ret
+-    _fetch_file_list "${mirror}" "${release}" > "${tmp_file_list}"
+-    ret=$?
+-    if [ $ret -ne 0 ] ; then
+-        echo "ERROR fetching FILE_LIST" >&2
+-        exit $ret
++    if [ -n "${fetch_patches}" ] ; then
++        _fetch_file_list "${mirror}" "${release}" "patches" >> "${tmp_file_list}"
++        ret=$?
++        if [ $ret -ne 0 ] ; then
++            echo "ERROR fetching FILE_LIST" >&2
++            exit $ret
++        fi
++    elif [ -n "${fetch_extra}" ] ; then
++        _fetch_file_list "${mirror}" "${release}" "extra" >> "${tmp_file_list}"
++        ret=$?
++        if [ $ret -ne 0 ] ; then
++            echo "ERROR fetching FILE_LIST" >&2
++            exit $ret
++        fi
++    else
++        _fetch_file_list "${mirror}" "${release}" "$(_release_base "${release}")" > "${tmp_file_list}"
++        ret=$?
++        if [ $ret -ne 0 ] ; then
++            echo "ERROR fetching FILE_LIST" >&2
++            exit $ret
++        fi
      fi
 -    
 +
      if [ -n "${fetch_tagfiles}" ] ; then
          for section in $(_sections_from_file_list "${tmp_file_list}") ; do
              mkdir -p "${tmp_dir}/${section}"
-@@ -97,8 +97,8 @@ main() {
+@@ -97,8 +120,8 @@ main() {
              fi
          done
      fi
@@ -76,7 +130,7 @@ index a86fdf6..0ffeeb9 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..32b8dbb 100755
+index b71af3e..84a2bd9 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -110,7 +164,7 @@ index b71af3e..32b8dbb 100755
 +if [ -z "$INITRD" ]; then
 +	if [ "$ARCH" = "arm" ] ; then
 +		case "$VERSION" in
-+			11*|12*|13*|14.0|14.1) INITRD=initrd-versatile.img ;;
++			12*|13*|14.0|14.1) INITRD=initrd-versatile.img ;;
 +			*) INITRD=initrd-armv7.img ;;
 +		esac
 +	elif [ "$ARCH" = "aarch64" ] ; then
@@ -136,7 +190,7 @@ index b71af3e..32b8dbb 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -129,15 +149,20 @@ fi
+@@ -129,24 +149,46 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -157,10 +211,40 @@ index b71af3e..32b8dbb 100755
  if [ ! -f ${CACHEFS}/paths ] ; then
 -	bash ${CWD}/get_paths.sh -r ${RELEASE} > ${CACHEFS}/paths
 +	bash ${CWD}/get_paths.sh -r ${RELEASE} -m ${MIRROR} > ${CACHEFS}/paths
++fi
++if [ ! -f ${CACHEFS}/paths-patches ] ; then
++	bash ${CWD}/get_paths.sh -r ${RELEASE} -m ${MIRROR} -p > ${CACHEFS}/paths-patches
++fi
++if [ ! -f ${CACHEFS}/paths-extra ] ; then
++	bash ${CWD}/get_paths.sh -r ${RELEASE} -m ${MIRROR} -e > ${CACHEFS}/paths-extra
  fi
  for pkg in ${base_pkgs}
  do
-@@ -165,15 +190,27 @@ do
+-	path=$(grep ^${pkg} ${CACHEFS}/paths | cut -d : -f 1)
++	path=$(grep "^packages/$(basename "${pkg}")-" ${CACHEFS}/paths-patches | cut -d : -f 1)
+ 	if [ ${#path} -eq 0 ] ; then
+-		echo "$pkg not found"
+-		continue
++		path=$(grep ^${pkg}- ${CACHEFS}/paths | cut -d : -f 1)
++		if [ ${#path} -eq 0 ] ; then
++			path=$(grep "^$(basename "${pkg}")/$(basename "${pkg}")-" ${CACHEFS}/paths-extra | cut -d : -f 1)
++			if [ ${#path} -eq 0 ] ; then
++				echo "$pkg not found"
++				continue
++			else
++				l_pkg=$(cacheit extra/$path)
++			fi
++		else
++			l_pkg=$(cacheit $relbase/$path)
++		fi
++	else
++		l_pkg=$(cacheit patches/$path)
+ 	fi
+-	l_pkg=$(cacheit $relbase/$path)
+ 	if [ -e ./sbin/upgradepkg ] ; then
+ 		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
+ 		ROOT=/mnt \
+@@ -165,15 +207,27 @@ do
  done
  
  cd mnt
@@ -195,43 +279,32 @@ index b71af3e..32b8dbb 100755
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -193,26 +230,34 @@ mount --bind /etc/resolv.conf etc/resolv.conf
- chroot_slackpkg() {
- 	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
- 	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
-+	chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade slackpkg || true'
-+	if [ -e etc/slackpkg/mirrors.new ] ; then
-+		mv etc/slackpkg/mirrors.new etc/slackpkg/mirrors
-+		echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
-+	fi
-+	if [ -e etc/slackpkg/slackpkg.conf.new ] ; then
-+		mv etc/slackpkg/slackpkg.conf.new etc/slackpkg/slackpkg.conf
-+		sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
-+		sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
-+		sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
-+	fi
-+	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
- 	ret=0
- 	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
- 	chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade-all' || ret=$?
- 	if [ $ret -eq 0 ] || [ $ret -eq 20 ] ; then
+@@ -188,31 +242,7 @@ fi
+ 
+ mount --bind /etc/resolv.conf etc/resolv.conf
+ 
+-# for slackware 15.0, slackpkg return codes are now:
+-# 0 -> All OK, 1 -> something wrong, 20 -> empty list, 50 -> Slackpkg upgraded, 100 -> no pending updates
+-chroot_slackpkg() {
+-	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
+-	chroot . /bin/bash -c 'yes y | /usr/sbin/slackpkg -batch=on -default_answer=y update'
+-	ret=0
+-	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
+-	chroot . /bin/bash -c '/usr/sbin/slackpkg -batch=on -default_answer=y upgrade-all' || ret=$?
+-	if [ $ret -eq 0 ] || [ $ret -eq 20 ] ; then
 -		echo "uprade-all is OK"
-+		echo "upgrade-all is OK"
- 		return
+-		return
 -	elif [ $ret -eq 50 ] ; then
 -		chroot_slackpkg
- 	else
- 		return $?
- 	fi
- }
+-	else
+-		return $?
+-	fi
+-}
 -chroot_slackpkg
-+if [ -e etc/slackpkg/mirrors ] ; then
-+  chroot_slackpkg
-+fi
- 
+-
 -# now some cleanup of the minimal image
  set +x
- rm -rf var/lib/slackpkg/*
+-rm -rf var/lib/slackpkg/*
 -rm -rf usr/share/locale/*
 -rm -rf usr/man/*
 -find usr/share/terminfo/ -type f ! -name 'linux' -a ! -name 'xterm' -a ! -name 'screen.linux' -exec rm -f "{}" \;
@@ -262,6 +335,6 @@ fi
 # terse package install for installpkg
 export TERSE=0
 
-RELEASENAME="$RELEASENAME" ARCH="$ARCH" VERSION="$VERSION" bash mkimage-slackware.sh
+RELEASENAME="$RELEASENAME" ARCH="$ARCH" VERSION="$VERSION" bash -x mkimage-slackware.sh
 chown "$CHOWN_TO" "$RELEASENAME-$VERSION.tar"
 mv "$RELEASENAME-$VERSION.tar" /data
