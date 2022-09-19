@@ -74,5 +74,6 @@ RUN \
     sed -i 's/SPINNING=on/SPINNING=off/' /etc/slackpkg/slackpkg.conf
 
 ARG TARGETARCH=
+# hadolint ignore=DL3006
 FROM slackware-$TARGETARCH
 CMD ["bash"]
