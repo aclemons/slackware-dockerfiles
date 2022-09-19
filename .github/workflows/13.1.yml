@@ -15,6 +15,7 @@ jobs:
 
       - name: Fetch x86 ChangeLogs
         run: |
+          curl -s -f -o slackware-13.1/ChangeLog.txt.arm https://slackware.uk/slackwarearm/armedslack-13.1/ChangeLog.txt
           curl -s -f -o slackware-13.1/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-13.1/ChangeLog.txt
           curl -s -f -o slackware-13.1/ChangeLog.txt.amd64 https://slackware.osuosl.org/slackware64-13.1/ChangeLog.txt
 
@@ -59,21 +60,13 @@ jobs:
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=13.1 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=13.1 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
+          docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=armedslack -e ARCH=arm -e VERSION=13.1 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           cp *.tar base_tarballs/
 
       - name: Restore prerequisites
         if: steps.cache-base-tarballs.outputs.cache-hit == 'true'
         run: |
           cp base_tarballs/*tar .
-
-      - name: Fetch Arm ChangeLog
-        run: |
-          curl -s -f -o slackware-13.1/ChangeLog.txt.arm https://slackware.uk/slackwarearm/armedslack-13.1/ChangeLog.txt
-
-      - name: Fetch Miniroot details
-        run: |
-          curl -s -f -o slackware-13.1/slackarm-13.1-miniroot_details.txt https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-13.1-miniroot_details.txt
-          curl -s -f -o slackware-13.1/slackarm-13.1-miniroot_details.txt.asc https://slackware.uk/slackwarearm/slackwarearm-devtools/minirootfs/roots/slackarm-13.1-miniroot_details.txt.asc
 
       - name: Build and push
         uses: docker/build-push-action@v3
