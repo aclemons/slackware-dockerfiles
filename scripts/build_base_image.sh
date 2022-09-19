@@ -34,7 +34,7 @@ git checkout ba93a9dc82270a90d19abefda0019d7e607183ea
 
 cat << 'EOF' | patch -p1
 diff --git a/get_paths.sh b/get_paths.sh
-index a86fdf6..c3052a1 100755
+index a86fdf6..0ffeeb9 100755
 --- a/get_paths.sh
 +++ b/get_paths.sh
 @@ -12,7 +12,7 @@ _usage() {
@@ -42,7 +42,7 @@ index a86fdf6..c3052a1 100755
  
  _release_base() {
 -    echo "${1}" | cut -d - -f 1
-+    echo "${1}" | cut -d - -f 1 | sed 's/slackwarearm/slackware/;s/slackwareaarch64/slackware/'
++    echo "${1}" | cut -d - -f 1 | sed 's/armedslack/slackware/;s/slackwarearm/slackware/;s/slackwareaarch64/slackware/'
  }
  
  _fetch_file_list() {
@@ -55,8 +55,28 @@ index a86fdf6..c3052a1 100755
      tmp_dir="$(mktemp -d)"
      tmp_file_list="${tmp_dir}/FILE_LIST"
      _fetch_file_list "${mirror}" "${release}" > "${tmp_file_list}"
+@@ -86,7 +86,7 @@ main() {
+         echo "ERROR fetching FILE_LIST" >&2
+         exit $ret
+     fi
+-    
++
+     if [ -n "${fetch_tagfiles}" ] ; then
+         for section in $(_sections_from_file_list "${tmp_file_list}") ; do
+             mkdir -p "${tmp_dir}/${section}"
+@@ -97,8 +97,8 @@ main() {
+             fi
+         done
+     fi
+-    
+-    grep '\.t.z$' "${tmp_file_list}" | awk '{ print $8 }' | sed -e 's|\./\(.*\.t.z\)$|\1|g'
++
++    grep '\.t.z$' "${tmp_file_list}" | awk '{ print $(NF) }' | sed -e 's|\./\(.*\.t.z\)$|\1|g'
+ }
+ 
+ _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..b364e2d 100755
+index b71af3e..32b8dbb 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -88,16 +108,16 @@ index b71af3e..b364e2d 100755
  
 -cacheit "isolinux/initrd.img"
 +if [ -z "$INITRD" ]; then
-+  if [ "$ARCH" = "arm" ] ; then
-+    case "$VERSION" in
-+      11*|12*|13*|14.0|14.1) INITRD=initrd-versatile.img ;;
-+      *) INITRD=initrd-armv7.img ;;
-+    esac
-+  elif [ "$ARCH" = "aarch64" ] ; then
-+    INITRD=initrd-armv8.img
-+  else
-+    INITRD=${INITRD:-initrd.img}
-+  fi
++	if [ "$ARCH" = "arm" ] ; then
++		case "$VERSION" in
++			11*|12*|13*|14.0|14.1) INITRD=initrd-versatile.img ;;
++			*) INITRD=initrd-armv7.img ;;
++		esac
++	elif [ "$ARCH" = "aarch64" ] ; then
++		INITRD=initrd-armv8.img
++	else
++		INITRD=initrd.img
++	fi
 +fi
 +
 +cacheit "isolinux/$INITRD"
@@ -133,7 +153,7 @@ index b71af3e..b364e2d 100755
  fi
  
 -relbase=$(echo ${RELEASE} | cut -d- -f1)
-+relbase=$(echo ${RELEASE} | cut -d- -f1 | sed 's/slackwarearm/slackware/;s/slackwareaarch64/slackware/')
++relbase=$(echo ${RELEASE} | cut -d- -f1 | sed 's/armedslack/slackware/;s/slackwarearm/slackware/;s/slackwareaarch64/slackware/')
  if [ ! -f ${CACHEFS}/paths ] ; then
 -	bash ${CWD}/get_paths.sh -r ${RELEASE} > ${CACHEFS}/paths
 +	bash ${CWD}/get_paths.sh -r ${RELEASE} -m ${MIRROR} > ${CACHEFS}/paths
@@ -148,13 +168,13 @@ index b71af3e..b364e2d 100755
 +chroot . /bin/sh -c '/sbin/ldconfig'
 +
 +if [ ! -e ./root/.gnupg ] ; then
-+  cacheit "GPG-KEY"
-+  cp ${CACHEFS}/GPG-KEY .
-+  echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
-+       chroot . /usr/bin/gpg --import GPG-KEY
-+  PATH=/bin:/sbin:/usr/bin:/usr/sbin \
-+      chroot . /usr/bin/gpg --import GPG-KEY
-+ rm GPG-KEY
++	cacheit "GPG-KEY"
++	cp ${CACHEFS}/GPG-KEY .
++	echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++	chroot . /usr/bin/gpg --import GPG-KEY
++	PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++	chroot . /usr/bin/gpg --import GPG-KEY
++	rm GPG-KEY
 +fi
 +
  set -x
@@ -167,10 +187,10 @@ index b71af3e..b364e2d 100755
 -sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
 -sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
 +if [ -e etc/slackpkg/mirrors ] ; then
-+  echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
-+  sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
-+  sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
-+  sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
++	echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
++	sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
++	sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
++	sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
 +fi
  
  if [ ! -f etc/rc.d/rc.local ] ; then
