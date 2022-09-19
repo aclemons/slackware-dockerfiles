@@ -78,8 +78,8 @@ jobs:
           context: .
           file: slackware-current/Dockerfile
           tags: |
-            ghcr.io/${{ github.repository_owner }}/slackware:current-base
-            ${{ github.repository_owner }}/slackware:current-base
+            ghcr.io/${{ github.repository_owner }}/slackware:current
+            ${{ github.repository_owner }}/slackware:current
 
       - name: Trim cache
         run: |
