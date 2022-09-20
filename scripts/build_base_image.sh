@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..84a2bd9 100755
+index b71af3e..20a8824 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -156,7 +156,16 @@ index b71af3e..84a2bd9 100755
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
  CWD=$(pwd)
-@@ -88,16 +95,29 @@ function cacheit() {
+@@ -67,6 +74,8 @@ base_pkgs="a/aaa_base \
+ 	a/utempter \
+ 	a/which \
+ 	a/util-linux \
++	a/elogind \
++	l/libseccomp \
+ 	l/mpfr \
+ 	l/libunistring \
+ 	ap/diffutils \
+@@ -88,16 +97,29 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -190,7 +199,7 @@ index b71af3e..84a2bd9 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -129,24 +149,46 @@ fi
+@@ -129,24 +151,46 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -244,7 +253,7 @@ index b71af3e..84a2bd9 100755
  	if [ -e ./sbin/upgradepkg ] ; then
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
-@@ -165,15 +207,27 @@ do
+@@ -165,15 +209,27 @@ do
  done
  
  cd mnt
@@ -279,7 +288,7 @@ index b71af3e..84a2bd9 100755
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -188,31 +242,7 @@ fi
+@@ -188,31 +244,7 @@ fi
  
  mount --bind /etc/resolv.conf etc/resolv.conf
  
