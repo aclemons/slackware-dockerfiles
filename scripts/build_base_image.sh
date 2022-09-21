@@ -30,7 +30,7 @@ cd /tmp
 
 git clone https://github.com/vbatts/slackware-container.git
 cd slackware-container
-git checkout ba93a9dc82270a90d19abefda0019d7e607183ea
+git checkout aef9920fae86a9a79247eed19932f7c871d29c70
 
 cat << 'EOF' | patch -p1
 diff --git a/get_paths.sh b/get_paths.sh
@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index b71af3e..20a8824 100755
+index 3c7a17d..87f365f 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -156,16 +156,7 @@ index b71af3e..20a8824 100755
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
  CWD=$(pwd)
-@@ -67,6 +74,8 @@ base_pkgs="a/aaa_base \
- 	a/utempter \
- 	a/which \
- 	a/util-linux \
-+	a/elogind \
-+	l/libseccomp \
- 	l/mpfr \
- 	l/libunistring \
- 	ap/diffutils \
-@@ -88,16 +97,29 @@ function cacheit() {
+@@ -90,16 +97,29 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -199,7 +190,7 @@ index b71af3e..20a8824 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -129,24 +151,46 @@ fi
+@@ -131,24 +151,46 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -253,7 +244,7 @@ index b71af3e..20a8824 100755
  	if [ -e ./sbin/upgradepkg ] ; then
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
-@@ -165,15 +209,27 @@ do
+@@ -167,15 +209,30 @@ do
  done
  
  cd mnt
@@ -271,7 +262,7 @@ index b71af3e..20a8824 100755
 +fi
 +
  set -x
- touch etc/resolv.conf
+-touch etc/resolv.conf
 -echo "export TERM=linux" >> etc/profile.d/term.sh
 -chmod +x etc/profile.d/term.sh
 -echo ". /etc/profile" > .bashrc
@@ -284,14 +275,20 @@ index b71af3e..20a8824 100755
 +	sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
 +	sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
 +	sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
++	if [ "$VERSION" = "current" ] ; then
++		mkdir -p var/lib/slackpkg
++		touch var/lib/slackpkg/current
++	fi
 +fi
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -188,31 +244,7 @@ fi
+@@ -188,36 +245,9 @@ EOF
+ 	chmod +x etc/rc.d/rc.local
+ fi
  
- mount --bind /etc/resolv.conf etc/resolv.conf
- 
+-mount --bind /etc/resolv.conf etc/resolv.conf
+-
 -# for slackware 15.0, slackpkg return codes are now:
 -# 0 -> All OK, 1 -> something wrong, 20 -> empty list, 50 -> Slackpkg upgraded, 100 -> no pending updates
 -chroot_slackpkg() {
@@ -319,7 +316,10 @@ index b71af3e..20a8824 100755
 -find usr/share/terminfo/ -type f ! -name 'linux' -a ! -name 'xterm' -a ! -name 'screen.linux' -exec rm -f "{}" \;
  umount $ROOTFS/dev
  rm -f dev/* # containers should expect the kernel API (`mount -t devtmpfs none /dev`)
- umount etc/resolv.conf
+-umount etc/resolv.conf
+ 
+ tar --numeric-owner -cf- . > ${CWD}/${RELEASE}.tar
+ ls -sh ${CWD}/${RELEASE}.tar
 EOF
 
 RELEASENAME=${RELEASENAME:-}
