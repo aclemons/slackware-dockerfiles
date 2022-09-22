@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..87f365f 100755
+index 3c7a17d..9cf4408 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -156,7 +156,19 @@ index 3c7a17d..87f365f 100755
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
  CWD=$(pwd)
-@@ -90,16 +97,29 @@ function cacheit() {
+@@ -78,6 +85,11 @@ base_pkgs="a/aaa_base \
+ 	n/iproute2 \
+ 	n/openssl"
+ 
++if [ "$VERSION" = "15.0" ] && [ "$ARCH" = "arm" ] ; then
++	base_pkgs="installer_fix \
++	$base_pkgs"
++fi
++
+ function cacheit() {
+ 	file=$1
+ 	if [ ! -f "${CACHEFS}/${file}"  ] ; then
+@@ -90,16 +102,29 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -190,7 +202,7 @@ index 3c7a17d..87f365f 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -131,24 +151,46 @@ fi
+@@ -131,25 +156,63 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -221,6 +233,12 @@ index 3c7a17d..87f365f 100755
  for pkg in ${base_pkgs}
  do
 -	path=$(grep ^${pkg} ${CACHEFS}/paths | cut -d : -f 1)
++	installer_fix=false
++	if [ "$pkg" = "installer_fix" ] ; then
++		# see slackwarearm-15.0 ChangeLog entry from Thu Sep 15 08:08:08 UTC 2022
++		installer_fix=true
++		pkg=a/aaa_glibc-solibs
++	fi
 +	path=$(grep "^packages/$(basename "${pkg}")-" ${CACHEFS}/paths-patches | cut -d : -f 1)
  	if [ ${#path} -eq 0 ] ; then
 -		echo "$pkg not found"
@@ -241,10 +259,22 @@ index 3c7a17d..87f365f 100755
 +		l_pkg=$(cacheit patches/$path)
  	fi
 -	l_pkg=$(cacheit $relbase/$path)
- 	if [ -e ./sbin/upgradepkg ] ; then
+-	if [ -e ./sbin/upgradepkg ] ; then
++	if $installer_fix ; then
++		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++		chroot . /bin/tar-1.13 -xvf ${l_pkg} lib/incoming/libc-2.33.so
++		PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++		chroot . /bin/tar -xvf ${l_pkg} lib/incoming/libc-2.33.so
++		mv lib/incoming/libc-2.33.so lib && rm -rf lib/incoming
++		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++		chroot . /bin/test -x /bin/sh
++		PATH=/bin:/sbin:/usr/bin:/usr/sbin \
++		chroot . /bin/test -x /bin/sh # confirm bug is fixed
++	elif [ -e ./sbin/upgradepkg ] ; then
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
-@@ -167,15 +209,30 @@ do
+ 		chroot . /sbin/upgradepkg ${root_flag} ${install_args} ${l_pkg}
+@@ -167,15 +230,30 @@ do
  done
  
  cd mnt
@@ -283,7 +313,7 @@ index 3c7a17d..87f365f 100755
  
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -188,36 +245,9 @@ EOF
+@@ -188,36 +266,9 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  
