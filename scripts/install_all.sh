@@ -34,20 +34,15 @@ configure_current() {
 
 configure_slackpkg() {
   local mirror_base="$1"
+  local slackware_dir
 
-  # TODO - very fragile - arm has ARCH set in the slackpkg config
-  if grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null 2>&1 ; then
-    mirror="$mirror_base/slackwarearm-15.0/"
-  else
-    if [ -e /usr/lib64 ] ; then
-      mirror="$mirror_base/slackware64-15.0/"
-    else
-      mirror="$mirror_base/slackware-15.0/"
-    fi
-  fi
+  slackware_dir="$(basename "$(sed -n '/^h/p' /etc/slackpkg/mirrors)")"
 
-  if ! grep ^ARCH /etc/slackpkg/slackpkg.conf > /dev/null 2>&1 ; then
-    if [ ! -e /usr/lib64 ] ; then
+  mirror="$mirror_base/$slackware_dir/"
+
+  # on linux/386, force the ARCH
+  if [ ! -e /usr/lib64 ]; then
+    if [ ! -e /etc/os-release ] || ! grep slackware-arm /etc/os-release > /dev/null 2>&1 ; then
       sed -i 's/^#ARCH.*$/ARCH=i386/' /etc/slackpkg/slackpkg.conf
     fi
   fi
@@ -87,7 +82,9 @@ if [ -e /etc/slackpkg/slackpkg.conf.new ] ; then
   mv /etc/slackpkg/slackpkg.conf.new /etc/slackpkg/slackpkg.conf
 
   if [ -e /etc/slackpkg/mirrors.new ] ; then
+    old_mirror="$(sed -n '/^h/p' /etc/slackpkg/mirrors)"
     mv /etc/slackpkg/mirrors.new /etc/slackpkg/mirrors
+    printf '%s\n' "$old_mirror" >> /etc/slackpkg/mirrors
   fi
 
   if [ -e /etc/slackpkg/blacklist.new ] ; then
@@ -103,15 +100,6 @@ sed -i 's,SIZE=\$( stty size )$,SIZE=$( [[ $- != *i* ]] \&\& stty size || echo "
 
 slackpkg -default_answer=yes -batch=on update
 
-if sed -n '/^PRETTY_NAME/p' /etc/os-release | grep post > /dev/null 2>&1 ; then
-  EXIT_CODE=0
-  slackpkg -default_answer=yes -batch=on install aaa_glibc-solibs aaa_libraries pcre2 libpsl || EXIT_CODE=$?
-
-  if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
-    exit $EXIT_CODE
-  fi
-fi
-
 EXIT_CODE=0
 slackpkg -default_answer=yes -batch=on upgrade-all || EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
@@ -120,10 +108,15 @@ fi
 
 sed -i 's/DOWNLOAD_ALL=on/DOWNLOAD_ALL=off/' /etc/slackpkg/slackpkg.conf
 
-slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
-# first invocation can fail before everything is installed
-slackpkg -default_answer=yes -batch=on install a/* ap/* d/* e/* f/* k/* kde/* l/* n/* t/* tcl/* x/* xap/* xfce/* y/* || EXIT_CODE=$?
-EXIT_CODE=0
+for series in a ap d e f k kde l n t tcl x xap xfce y ; do
+  slackpkg -default_answer=yes -batch=on install "$series"/* || EXIT_CODE=$?
+  if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
+    exit $EXIT_CODE
+  fi
+
+  rm -rf /var/cache/packages/*
+done
+
 slackpkg -default_answer=yes -batch=on install-new || EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 20 ] ; then
   exit $EXIT_CODE
