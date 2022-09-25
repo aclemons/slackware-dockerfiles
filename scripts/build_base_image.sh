@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..ae12e70 100755
+index 3c7a17d..0de8b05 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -287,7 +287,7 @@ index 3c7a17d..ae12e70 100755
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
  		chroot . /sbin/upgradepkg ${root_flag} ${install_args} ${l_pkg}
-@@ -167,16 +241,35 @@ do
+@@ -167,16 +241,38 @@ do
  done
  
  cd mnt
@@ -302,7 +302,7 @@ index 3c7a17d..ae12e70 100755
 -sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
 +PATH=/bin:/sbin:/usr/bin:/usr/sbin \
 +chroot . /bin/sh -c '/sbin/ldconfig'
-+
+ 
 +if [ ! -e ./root/.gnupg ] ; then
 +	cacheit "GPG-KEY"
 +	cp ${CACHEFS}/GPG-KEY .
@@ -312,12 +312,15 @@ index 3c7a17d..ae12e70 100755
 +	chroot . /usr/bin/gpg --import GPG-KEY
 +	rm GPG-KEY
 +fi
- 
++
 +set -x
 +if [ "$MINIMAL" = "yes" ] || [ "$MINIMAL" = "1" ] ; then
 +	echo "export TERM=linux" >> etc/profile.d/term.sh
 +	chmod +x etc/profile.d/term.sh
 +	echo ". /etc/profile" > .bashrc
++fi
++if [ -e etc/slackpkg ] ; then
++	find etc/slackpkg/ -type f -name "*.new" -exec rename ".new" "" {} \;
 +fi
 +if [ -e etc/slackpkg/mirrors ] ; then
 +	echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
@@ -332,7 +335,7 @@ index 3c7a17d..ae12e70 100755
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
  	cat >> etc/rc.d/rc.local <<EOF
-@@ -188,36 +281,16 @@ EOF
+@@ -188,36 +284,16 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  
