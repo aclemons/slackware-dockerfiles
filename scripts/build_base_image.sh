@@ -24,7 +24,7 @@
 
 set -e
 
-apk add --no-cache wget git bash curl cpio file patch
+apk add --no-cache wget git bash curl cpio file patch rsync
 
 cd /tmp
 
@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..9cf4408 100755
+index 3c7a17d..ae12e70 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -141,7 +141,7 @@ index 3c7a17d..9cf4408 100755
         *) ARCH=64 ;;
    esac
  fi
-@@ -15,7 +16,13 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
+@@ -15,9 +16,16 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
  VERSION=${VERSION:="current"}
  RELEASENAME=${RELEASENAME:-"slackware${ARCH}"}
  RELEASE=${RELEASE:-"${RELEASENAME}-${VERSION}"}
@@ -155,8 +155,11 @@ index 3c7a17d..9cf4408 100755
 +fi
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
++MINIMAL=${MINIMAL:-no}
  CWD=$(pwd)
-@@ -78,6 +85,11 @@ base_pkgs="a/aaa_base \
+ 
+ base_pkgs="a/aaa_base \
+@@ -78,6 +86,11 @@ base_pkgs="a/aaa_base \
  	n/iproute2 \
  	n/openssl"
  
@@ -168,7 +171,7 @@ index 3c7a17d..9cf4408 100755
  function cacheit() {
  	file=$1
  	if [ ! -f "${CACHEFS}/${file}"  ] ; then
-@@ -90,16 +102,29 @@ function cacheit() {
+@@ -90,16 +103,39 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -198,11 +201,21 @@ index 3c7a17d..9cf4408 100755
 +	xzcat "${CACHEFS}/isolinux/$INITRD" | cpio -idvm --null --no-absolute-filenames
  else
 -	zcat "${CACHEFS}/isolinux/initrd.img" | cpio -idvm --null --no-absolute-filenames
-+	zcat "${CACHEFS}/isolinux/$INITRD" | cpio -idvm --null --no-absolute-filenames
++	zcat "${CACHEFS}/isolinux/$INITRD" > ${CACHEFS}/isolinux/$INITRD.decompressed
++	if file ${CACHEFS}/isolinux/$INITRD.decompressed | grep -wq cpio ; then
++		< "${CACHEFS}/isolinux/$INITRD".decompressed cpio -idvm --null --no-absolute-filenames
++	else
++		mkdir -p $ROOTFS.mnt
++		mount -o loop ${CACHEFS}/isolinux/$INITRD.decompressed $ROOTFS.mnt
++		rsync -aAXHv $ROOTFS.mnt/ $ROOTFS
++		umount $ROOTFS.mnt
++		rm -rf $ROOTFS.mnt
++		(cd bin && ln -sf gzip.bin gzip)
++	fi
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -131,25 +156,63 @@ fi
+@@ -131,25 +167,63 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -274,10 +287,19 @@ index 3c7a17d..9cf4408 100755
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
  		chroot . /sbin/upgradepkg ${root_flag} ${install_args} ${l_pkg}
-@@ -167,15 +230,30 @@ do
+@@ -167,16 +241,35 @@ do
  done
  
  cd mnt
+-set -x
+-touch etc/resolv.conf
+-echo "export TERM=linux" >> etc/profile.d/term.sh
+-chmod +x etc/profile.d/term.sh
+-echo ". /etc/profile" > .bashrc
+-echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
+-sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
+-sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
+-sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
 +PATH=/bin:/sbin:/usr/bin:/usr/sbin \
 +chroot . /bin/sh -c '/sbin/ldconfig'
 +
@@ -290,16 +312,13 @@ index 3c7a17d..9cf4408 100755
 +	chroot . /usr/bin/gpg --import GPG-KEY
 +	rm GPG-KEY
 +fi
-+
- set -x
--touch etc/resolv.conf
--echo "export TERM=linux" >> etc/profile.d/term.sh
--chmod +x etc/profile.d/term.sh
--echo ". /etc/profile" > .bashrc
--echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
--sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
--sed -i 's/POSTINST=on/POSTINST=off/' etc/slackpkg/slackpkg.conf
--sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
+ 
++set -x
++if [ "$MINIMAL" = "yes" ] || [ "$MINIMAL" = "1" ] ; then
++	echo "export TERM=linux" >> etc/profile.d/term.sh
++	chmod +x etc/profile.d/term.sh
++	echo ". /etc/profile" > .bashrc
++fi
 +if [ -e etc/slackpkg/mirrors ] ; then
 +	echo "${MIRROR}/${RELEASE}/" >> etc/slackpkg/mirrors
 +	sed -i 's/DIALOG=on/DIALOG=off/' etc/slackpkg/slackpkg.conf
@@ -310,10 +329,10 @@ index 3c7a17d..9cf4408 100755
 +		touch var/lib/slackpkg/current
 +	fi
 +fi
- 
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
-@@ -188,36 +266,9 @@ EOF
+ 	cat >> etc/rc.d/rc.local <<EOF
+@@ -188,36 +281,16 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  
@@ -338,12 +357,17 @@ index 3c7a17d..9cf4408 100755
 -}
 -chroot_slackpkg
 -
--# now some cleanup of the minimal image
+ # now some cleanup of the minimal image
  set +x
--rm -rf var/lib/slackpkg/*
+ rm -rf var/lib/slackpkg/*
 -rm -rf usr/share/locale/*
 -rm -rf usr/man/*
 -find usr/share/terminfo/ -type f ! -name 'linux' -a ! -name 'xterm' -a ! -name 'screen.linux' -exec rm -f "{}" \;
++if [ "$MINIMAL" = "yes" ] || [ "$MINIMAL" = "1" ] ; then
++	rm -rf usr/share/locale/*
++	rm -rf usr/man/*
++	find usr/share/terminfo/ -type f ! -name 'linux' -a ! -name 'xterm' -a ! -name 'screen.linux' -exec rm -f "{}" \;
++fi
  umount $ROOTFS/dev
  rm -f dev/* # containers should expect the kernel API (`mount -t devtmpfs none /dev`)
 -umount etc/resolv.conf

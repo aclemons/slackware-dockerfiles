@@ -18,6 +18,7 @@
 - [`12.2`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-12.2/Dockerfile)
 - [`12.1`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-12.1/Dockerfile)
 - [`12.0`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-12.0/Dockerfile)
+- [`11.0`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-11.0/Dockerfile)
 
 # Quick reference (cont.)
 
