@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..c958d41 100755
+index 3c7a17d..765b0b7 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -163,8 +163,11 @@ index 3c7a17d..c958d41 100755
  	a/aaa_elflibs \
  	a/aaa_libraries \
  	a/coreutils \
-@@ -41,10 +50,12 @@ base_pkgs="a/aaa_base \
+@@ -39,12 +48,15 @@ base_pkgs="a/aaa_base \
+ 	a/bash \
+ 	a/etc \
  	a/gzip \
++	a/textutils \
  	l/pcre2 \
  	l/libpsl \
 +	l/libusb \
@@ -176,7 +179,7 @@ index 3c7a17d..c958d41 100755
  	l/ncurses \
  	a/bin \
  	a/bzip2 \
-@@ -78,6 +89,11 @@ base_pkgs="a/aaa_base \
+@@ -78,6 +90,11 @@ base_pkgs="a/aaa_base \
  	n/iproute2 \
  	n/openssl"
  
@@ -188,7 +191,7 @@ index 3c7a17d..c958d41 100755
  function cacheit() {
  	file=$1
  	if [ ! -f "${CACHEFS}/${file}"  ] ; then
-@@ -90,16 +106,39 @@ function cacheit() {
+@@ -90,16 +107,39 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -232,7 +235,7 @@ index 3c7a17d..c958d41 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -131,25 +170,63 @@ fi
+@@ -131,25 +171,63 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -304,7 +307,7 @@ index 3c7a17d..c958d41 100755
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
  		chroot . /sbin/upgradepkg ${root_flag} ${install_args} ${l_pkg}
-@@ -167,16 +244,38 @@ do
+@@ -167,16 +245,38 @@ do
  done
  
  cd mnt
@@ -352,7 +355,7 @@ index 3c7a17d..c958d41 100755
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
  	cat >> etc/rc.d/rc.local <<EOF
-@@ -188,36 +287,16 @@ EOF
+@@ -188,36 +288,16 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  
