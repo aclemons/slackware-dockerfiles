@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..765b0b7 100755
+index 3c7a17d..8f27602 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -141,7 +141,7 @@ index 3c7a17d..765b0b7 100755
         *) ARCH=64 ;;
    esac
  fi
-@@ -15,12 +16,20 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
+@@ -15,18 +16,27 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
  VERSION=${VERSION:="current"}
  RELEASENAME=${RELEASENAME:-"slackware${ARCH}"}
  RELEASE=${RELEASE:-"${RELEASENAME}-${VERSION}"}
@@ -163,7 +163,14 @@ index 3c7a17d..765b0b7 100755
  	a/aaa_elflibs \
  	a/aaa_libraries \
  	a/coreutils \
-@@ -39,12 +48,15 @@ base_pkgs="a/aaa_base \
+ 	a/glibc-solibs \
+ 	a/aaa_glibc-solibs \
+ 	a/aaa_terminfo \
++	a/fileutils \
+ 	a/pam \
+ 	a/cracklib \
+ 	a/libpwquality \
+@@ -39,12 +49,15 @@ base_pkgs="a/aaa_base \
  	a/bash \
  	a/etc \
  	a/gzip \
@@ -179,7 +186,7 @@ index 3c7a17d..765b0b7 100755
  	l/ncurses \
  	a/bin \
  	a/bzip2 \
-@@ -78,6 +90,11 @@ base_pkgs="a/aaa_base \
+@@ -78,6 +91,11 @@ base_pkgs="a/aaa_base \
  	n/iproute2 \
  	n/openssl"
  
@@ -191,7 +198,7 @@ index 3c7a17d..765b0b7 100755
  function cacheit() {
  	file=$1
  	if [ ! -f "${CACHEFS}/${file}"  ] ; then
-@@ -90,16 +107,39 @@ function cacheit() {
+@@ -90,16 +108,41 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -230,12 +237,14 @@ index 3c7a17d..765b0b7 100755
 +		rsync -aAXHv $ROOTFS.mnt/ $ROOTFS
 +		umount $ROOTFS.mnt
 +		rm -rf $ROOTFS.mnt
-+		(cd bin && ln -sf gzip.bin gzip)
++		if [ -e bin/gzip.bin ] ; then
++			(cd bin && ln -sf gzip.bin gzip)
++		fi
 +	fi
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -131,25 +171,63 @@ fi
+@@ -131,25 +174,63 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -307,7 +316,7 @@ index 3c7a17d..765b0b7 100755
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
  		chroot . /sbin/upgradepkg ${root_flag} ${install_args} ${l_pkg}
-@@ -167,16 +245,38 @@ do
+@@ -167,16 +248,38 @@ do
  done
  
  cd mnt
@@ -323,7 +332,7 @@ index 3c7a17d..765b0b7 100755
 +PATH=/bin:/sbin:/usr/bin:/usr/sbin \
 +chroot . /bin/sh -c '/sbin/ldconfig'
  
-+if [ ! -e ./root/.gnupg ] ; then
++if [ ! -e ./root/.gnupg ] && [ -e ./usr/bin/gpg ] ; then
 +	cacheit "GPG-KEY"
 +	cp ${CACHEFS}/GPG-KEY .
 +	echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
@@ -355,7 +364,7 @@ index 3c7a17d..765b0b7 100755
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
  	cat >> etc/rc.d/rc.local <<EOF
-@@ -188,36 +288,16 @@ EOF
+@@ -188,36 +291,16 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  

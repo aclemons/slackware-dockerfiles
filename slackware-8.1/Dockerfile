@@ -1,0 +1,7 @@
+FROM scratch as slackware-386
+ADD slackware-8.1.tar /
+
+ARG TARGETARCH=
+# hadolint ignore=DL3006
+FROM slackware-$TARGETARCH
+CMD ["bash"]
