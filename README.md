@@ -24,6 +24,7 @@
 - [`10.0`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-10.0/Dockerfile)
 - [`9.1`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-9.1/Dockerfile)
 - [`9.0`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-9.0/Dockerfile)
+- [`8.1`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-8.1/Dockerfile)
 
 # Quick reference (cont.)
 
