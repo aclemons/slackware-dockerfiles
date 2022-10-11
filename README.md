@@ -8,6 +8,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
+- [`current`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-current/Dockerfile)
 - [`latest`, `15.0`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-15.0/Dockerfile)
 - [`14.2`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-14.2/Dockerfile)
 - [`14.1`](https://github.com/aclemons/slackware-dockerfiles/blob/master/slackware-14.1/Dockerfile)
