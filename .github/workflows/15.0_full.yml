@@ -429,7 +429,7 @@ jobs:
             ${{ github.repository_owner }}/slackware:15.0-full
             ${{ github.repository_owner }}/slackware:latest-full
 
-      - uses: geekyeggo/delete-artifact@v1
+      - uses: geekyeggo/delete-artifact@v2
         with:
           failOnError: false
           name: |
