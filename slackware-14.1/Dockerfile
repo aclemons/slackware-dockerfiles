@@ -1,5 +1,4 @@
 FROM scratch as slackware-386
-ENTRYPOINT ["linux32"]
 ADD slackware-14.1.tar /
 
 FROM scratch as slackware-amd64
