@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..af8133a 100755
+index 3c7a17d..a4823c7 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -155,7 +155,7 @@ index 3c7a17d..af8133a 100755
 +fi
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
-+MINIMAL=${MINIMAL:-no}
++MINIMAL=${MINIMAL:-yes}
  CWD=$(pwd)
  
  base_pkgs="a/aaa_base \
@@ -338,7 +338,7 @@ index 3c7a17d..af8133a 100755
 -sed -i 's/SPINNING=on/SPINNING=off/' etc/slackpkg/slackpkg.conf
 +PATH=/bin:/sbin:/usr/bin:/usr/sbin \
 +chroot . /bin/sh -c '/sbin/ldconfig'
-+
+ 
 +if [ ! -e ./root/.gnupg ] && [ -e ./usr/bin/gpg ] ; then
 +	cacheit "GPG-KEY"
 +	cp ${CACHEFS}/GPG-KEY .
@@ -348,7 +348,7 @@ index 3c7a17d..af8133a 100755
 +	chroot . /usr/bin/gpg --import GPG-KEY
 +	rm GPG-KEY
 +fi
- 
++
 +set -x
 +if [ "$MINIMAL" = "yes" ] || [ "$MINIMAL" = "1" ] ; then
 +	echo "export TERM=linux" >> etc/profile.d/term.sh
@@ -371,7 +371,7 @@ index 3c7a17d..af8133a 100755
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
  	cat >> etc/rc.d/rc.local <<EOF
-@@ -188,36 +298,16 @@ EOF
+@@ -188,36 +298,15 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  
@@ -398,7 +398,7 @@ index 3c7a17d..af8133a 100755
 -
  # now some cleanup of the minimal image
  set +x
- rm -rf var/lib/slackpkg/*
+-rm -rf var/lib/slackpkg/*
 -rm -rf usr/share/locale/*
 -rm -rf usr/man/*
 -find usr/share/terminfo/ -type f ! -name 'linux' -a ! -name 'xterm' -a ! -name 'screen.linux' -exec rm -f "{}" \;
@@ -413,6 +413,12 @@ index 3c7a17d..af8133a 100755
  
  tar --numeric-owner -cf- . > ${CWD}/${RELEASE}.tar
  ls -sh ${CWD}/${RELEASE}.tar
+@@ -227,5 +316,3 @@ for dir in cdrom dev sys proc ; do
+ 		umount $ROOTFS/$dir
+ 	fi
+ done
+-
+-
 EOF
 
 RELEASENAME=${RELEASENAME:-}
@@ -437,6 +443,6 @@ fi
 # terse package install for installpkg
 export TERSE=0
 
-RELEASENAME="$RELEASENAME" ARCH="$ARCH" VERSION="$VERSION" bash mkimage-slackware.sh
+MINIMAL=no RELEASENAME="$RELEASENAME" ARCH="$ARCH" VERSION="$VERSION" bash mkimage-slackware.sh
 chown "$CHOWN_TO" "$RELEASENAME-$VERSION.tar"
 mv "$RELEASENAME-$VERSION.tar" /data
