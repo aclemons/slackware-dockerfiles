@@ -130,7 +130,7 @@ index a86fdf6..914798c 100755
  
  _is_sourced || main "${@}"
 diff --git a/mkimage-slackware.sh b/mkimage-slackware.sh
-index 3c7a17d..a4823c7 100755
+index 3c7a17d..eba330d 100755
 --- a/mkimage-slackware.sh
 +++ b/mkimage-slackware.sh
 @@ -7,6 +7,7 @@ if [ -z "$ARCH" ]; then
@@ -141,7 +141,7 @@ index 3c7a17d..a4823c7 100755
         *) ARCH=64 ;;
    esac
  fi
-@@ -15,18 +16,28 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
+@@ -15,21 +16,32 @@ BUILD_NAME=${BUILD_NAME:-"slackware"}
  VERSION=${VERSION:="current"}
  RELEASENAME=${RELEASENAME:-"slackware${ARCH}"}
  RELEASE=${RELEASE:-"${RELEASENAME}-${VERSION}"}
@@ -155,7 +155,7 @@ index 3c7a17d..a4823c7 100755
 +fi
  CACHEFS=${CACHEFS:-"/tmp/${BUILD_NAME}/${RELEASE}"}
  ROOTFS=${ROOTFS:-"/tmp/rootfs-${RELEASE}"}
-+MINIMAL=${MINIMAL:-yes}
++MINIMAL=${MINIMAL:-no}
  CWD=$(pwd)
  
  base_pkgs="a/aaa_base \
@@ -171,7 +171,11 @@ index 3c7a17d..a4823c7 100755
  	a/pam \
  	a/cracklib \
  	a/libpwquality \
-@@ -39,12 +50,15 @@ base_pkgs="a/aaa_base \
++	a/lzlib \
+ 	a/e2fsprogs \
+ 	a/nvi \
+ 	a/pkgtools \
+@@ -39,12 +51,15 @@ base_pkgs="a/aaa_base \
  	a/bash \
  	a/etc \
  	a/gzip \
@@ -187,7 +191,7 @@ index 3c7a17d..a4823c7 100755
  	l/ncurses \
  	a/bin \
  	a/bzip2 \
-@@ -78,6 +92,11 @@ base_pkgs="a/aaa_base \
+@@ -78,6 +93,11 @@ base_pkgs="a/aaa_base \
  	n/iproute2 \
  	n/openssl"
  
@@ -199,7 +203,7 @@ index 3c7a17d..a4823c7 100755
  function cacheit() {
  	file=$1
  	if [ ! -f "${CACHEFS}/${file}"  ] ; then
-@@ -90,16 +109,47 @@ function cacheit() {
+@@ -90,16 +110,47 @@ function cacheit() {
  
  mkdir -p $ROOTFS $CACHEFS
  
@@ -251,7 +255,7 @@ index 3c7a17d..a4823c7 100755
  fi
  
  if stat -c %F $ROOTFS/cdrom | grep -q "symbolic link" ; then
-@@ -131,25 +181,63 @@ fi
+@@ -131,25 +182,63 @@ fi
  
  # an update in upgradepkg during the 14.2 -> 15.0 cycle changed/broke this
  root_env=""
@@ -323,7 +327,7 @@ index 3c7a17d..a4823c7 100755
  		echo PATH=/bin:/sbin:/usr/bin:/usr/sbin \
  		ROOT=/mnt \
  		chroot . /sbin/upgradepkg ${root_flag} ${install_args} ${l_pkg}
-@@ -167,16 +255,38 @@ do
+@@ -167,16 +256,38 @@ do
  done
  
  cd mnt
@@ -371,7 +375,7 @@ index 3c7a17d..a4823c7 100755
  if [ ! -f etc/rc.d/rc.local ] ; then
  	mkdir -p etc/rc.d
  	cat >> etc/rc.d/rc.local <<EOF
-@@ -188,36 +298,15 @@ EOF
+@@ -188,36 +299,15 @@ EOF
  	chmod +x etc/rc.d/rc.local
  fi
  
@@ -413,7 +417,7 @@ index 3c7a17d..a4823c7 100755
  
  tar --numeric-owner -cf- . > ${CWD}/${RELEASE}.tar
  ls -sh ${CWD}/${RELEASE}.tar
-@@ -227,5 +316,3 @@ for dir in cdrom dev sys proc ; do
+@@ -227,5 +317,3 @@ for dir in cdrom dev sys proc ; do
  		umount $ROOTFS/$dir
  	fi
  done
