@@ -15,6 +15,7 @@ jobs:
 
       - name: Fetch x86 ChangeLogs
         run: |
+          mkdir -p slackware-12.0
           curl -s -f -o slackware-12.0/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-12.0/ChangeLog.txt
 
       - name: Cache Base Tarballs
@@ -72,7 +73,9 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-next,mode=max
           context: .
-          file: slackware-12.0/Dockerfile
+          file: Dockerfile
+          build-args: |
+            VERSION=12.0
           tags: |
             ghcr.io/${{ github.repository_owner }}/slackware:12.0
             ${{ github.repository_owner }}/slackware:12.0

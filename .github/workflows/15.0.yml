@@ -15,6 +15,7 @@ jobs:
 
       - name: Fetch x86 ChangeLogs
         run: |
+          mkdir -p slackware-15.0
           curl -s -f -o slackware-15.0/ChangeLog.txt.arm https://slackware.uk/slackwarearm/slackwarearm-15.0/ChangeLog.txt
           curl -s -f -o slackware-15.0/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-15.0/ChangeLog.txt
           curl -s -f -o slackware-15.0/ChangeLog.txt.amd64 https://slackware.osuosl.org/slackware64-15.0/ChangeLog.txt
@@ -76,7 +77,9 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-next,mode=max
           context: .
-          file: slackware-15.0/Dockerfile
+          file: Dockerfile
+          build-args: |
+            VERSION=15.0
           tags: |
             ghcr.io/${{ github.repository_owner }}/slackware:15.0
             ${{ github.repository_owner }}/slackware:15.0

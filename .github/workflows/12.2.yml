@@ -15,6 +15,7 @@ jobs:
 
       - name: Fetch x86 ChangeLogs
         run: |
+          mkdir -p slackware-12.2
           curl -s -f -o slackware-12.2/ChangeLog.txt.arm https://slackware.uk/slackwarearm/armedslack-12.2/ChangeLog.txt
           curl -s -f -o slackware-12.2/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-12.2/ChangeLog.txt
 
@@ -65,6 +66,7 @@ jobs:
         if: steps.cache-base-tarballs.outputs.cache-hit == 'true'
         run: |
           cp base_tarballs/*tar .
+          mv armedslack-12.2.tar slackwarearm-12.2.tar
 
       - name: Build and push
         uses: docker/build-push-action@v3
@@ -74,7 +76,9 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-next,mode=max
           context: .
-          file: slackware-12.2/Dockerfile
+          file: Dockerfile
+          build-args: |
+            VERSION=12.2
           tags: |
             ghcr.io/${{ github.repository_owner }}/slackware:12.2
             ${{ github.repository_owner }}/slackware:12.2

@@ -15,6 +15,7 @@ jobs:
 
       - name: Fetch x86 ChangeLogs
         run: |
+          mkdir -p slackware-10.0
           curl -s -f -o slackware-10.0/ChangeLog.txt.386 https://slackware.osuosl.org/slackware-10.0/ChangeLog.txt
 
       - name: Cache Base Tarballs
@@ -56,7 +57,7 @@ jobs:
       - name: Build prerequisites
         if: steps.cache-base-tarballs.outputs.cache-hit != 'true'
         run: |
-          docker run --privileged --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=10.0 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
+          docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware -e ARCH=i586 -e VERSION=10.0 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           cp *.tar base_tarballs/
 
       - name: Restore prerequisites
@@ -72,7 +73,9 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-next,mode=max
           context: .
-          file: slackware-10.0/Dockerfile
+          file: Dockerfile
+          build-args: |
+            VERSION=10.0
           tags: |
             ghcr.io/${{ github.repository_owner }}/slackware:10.0
             ${{ github.repository_owner }}/slackware:10.0
