@@ -67,7 +67,7 @@ jobs:
           cp base_tarballs/*tar .
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: true
           platforms: linux/amd64,linux/386
