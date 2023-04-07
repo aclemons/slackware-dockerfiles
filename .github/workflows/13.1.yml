@@ -28,15 +28,6 @@ jobs:
           path: base_tarballs/
           key: ${{ runner.os }}-base-tarballs-13.1-${{ hashFiles('**/slackware-13.1/ChangeLog*', '**/scripts/build_base_image.sh') }}
 
-      - name: Cache Docker Builds
-        id: cache-docker-build
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-dockerbuild-13.1-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-dockerbuild-13.1
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -64,6 +55,7 @@ jobs:
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=slackware64 -e ARCH=x86_64 -e VERSION=13.1 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -e RELEASENAME=armedslack -e ARCH=arm -e VERSION=13.1 -e CHOWN_TO="$(id -u):$(id -g)" -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:3.15 sh /scripts/build_base_image.sh
           cp *.tar base_tarballs/
+          mv armedslack-13.1.tar slackwarearm-13.1.tar
 
       - name: Restore prerequisites
         if: steps.cache-base-tarballs.outputs.cache-hit == 'true'
@@ -76,8 +68,8 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/386,linux/arm/v4
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-next,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           context: .
           file: Dockerfile
           build-args: |
@@ -85,8 +77,3 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/slackware:13.1
             ${{ github.repository_owner }}/slackware:13.1
-
-      - name: Trim cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-next /tmp/.buildx-cache

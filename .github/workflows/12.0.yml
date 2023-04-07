@@ -26,15 +26,6 @@ jobs:
           path: base_tarballs/
           key: ${{ runner.os }}-base-tarballs-12.0-${{ hashFiles('**/slackware-12.0/ChangeLog*', '**/scripts/build_base_image.sh') }}
 
-      - name: Cache Docker Builds
-        id: cache-docker-build
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-dockerbuild-12.0-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-dockerbuild-12.0
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -71,8 +62,8 @@ jobs:
         with:
           push: true
           platforms: linux/386
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-next,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           context: .
           file: Dockerfile
           build-args: |
@@ -80,8 +71,3 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/slackware:12.0
             ${{ github.repository_owner }}/slackware:12.0
-
-      - name: Trim cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-next /tmp/.buildx-cache
