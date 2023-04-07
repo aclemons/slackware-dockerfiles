@@ -1,6 +1,7 @@
+---
 name: Slackware 10.1 Docker Images
 
-on:
+"on":
   schedule:
     - cron: '0 3 * * *'
   push:
