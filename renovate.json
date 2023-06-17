@@ -1,10 +1,22 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-    "helpers:pinGitHubActionDigests"
-  ],
-  "schedule": [
-    "before 4am"
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        "helpers:pinGitHubActionDigests"
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": [
+                "^(workflow-templates|\\.github\\/workflows)\\/[^/]+\\.[Yy][Aa]?[Mm][Ll]$",
+                "(^|\\/)action\\.[Yy][Aa]?[Mm][Ll]$"
+            ],
+            "matchStrings": [
+                "ubuntu-(?<currentValue>\\d\\d)\\.04"
+            ],
+            "depNameTemplate": "github actions runner ubuntu",
+            "packageNameTemplate": "actions/runner-images",
+            "datasourceTemplate": "github-releases",
+            "versioningTemplate": "docker"
+        }
+    ]
 }
