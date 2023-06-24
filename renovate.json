@@ -17,6 +17,16 @@
             "packageNameTemplate": "actions/runner-images",
             "datasourceTemplate": "github-releases",
             "versioningTemplate": "docker"
+        },
+        {
+            "fileMatch": [
+                "^\\.github\\/workflows\\/docker\\.yml$"
+            ],
+            "matchStrings": [
+                "ALPINE_IMAGE: alpine:(?<currentValue>.*?)\\s"
+            ],
+            "depNameTemplate": "alpine",
+            "datasourceTemplate": "docker"
         }
     ]
 }
