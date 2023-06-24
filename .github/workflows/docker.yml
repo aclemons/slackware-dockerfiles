@@ -8,6 +8,9 @@ name: Slackware Docker Images
     branches:
       - 'master'
 
+concurrency:
+  group: docker-master
+
 env:
   ALPINE_IMAGE: alpine:3.15.9@sha256:3362f865019db5f14ac5154cb0db2c3741ad1cce0416045be422ad4de441b081
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
