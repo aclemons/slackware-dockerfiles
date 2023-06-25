@@ -27,8 +27,7 @@ jobs:
   docker:
     strategy:
       matrix:
-        # version: ['8.1', '9.0', '9.1', '10.0', '10.1', '10.2', '11.0']
-        version: ['12.0', '12.1', '12.2', '13.0', '13.1', '13.37', '14.0', '14.1', '14.2', '15.0', 'current']
+        version: ['8.1', '9.0', '9.1', '10.0', '10.1', '10.2', '11.0', '12.0', '12.1', '12.2', '13.0', '13.1', '13.37', '14.0', '14.1', '14.2', '15.0', 'current']
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -94,7 +93,7 @@ jobs:
       - name: Build slackware tarball
         if: github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true'
         run: |
-          docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
+          docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware" -e ARCH="i586" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
@@ -104,7 +103,7 @@ jobs:
       - name: Build slackware64 tarball
         if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS), matrix.version)
         run: |
-          docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
+          docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware64" -e ARCH="x86_64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
@@ -114,7 +113,7 @@ jobs:
       - name: Build armedslack tarball
         if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
         run: |
-          docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
+          docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="armedslack" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
@@ -125,7 +124,7 @@ jobs:
       - name: Build slackwarearm tarball
         if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
         run: |
-          docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
+          docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwarearm" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
@@ -135,7 +134,7 @@ jobs:
       - name: Build slackwareaarch64 tarball
         if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS), matrix.version)
         run: |
-          docker run --privileged --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
+          docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwareaarch64" -e ARCH="aarch64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
