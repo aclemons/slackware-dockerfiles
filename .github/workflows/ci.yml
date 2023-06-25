@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ALPINE_IMAGE: alpine:3.15.9@sha256:3362f865019db5f14ac5154cb0db2c3741ad1cce0416045be422ad4de441b081
+  ALPINE_IMAGE: alpine:3.18.2@sha256:82d1e9d7ed48a7523bdebc18cf6290bdb97b82302a8a9c27d4fe885949ea94d1
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
   SLACKWAREARM_VERSIONS: '["14.0","14.1","14.2","15.0"]'
   SLACKWAREAARCH64_VERSIONS: '["current"]'
