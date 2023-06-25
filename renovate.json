@@ -23,7 +23,7 @@
                 "^\\.github\\/workflows\\/docker\\.yml$"
             ],
             "matchStrings": [
-                "ALPINE_IMAGE: alpine:(?<currentValue>.*?)\\s"
+                "\\s*ALPINE_IMAGE: alpine:(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)\\s*"
             ],
             "depNameTemplate": "alpine",
             "datasourceTemplate": "docker"
