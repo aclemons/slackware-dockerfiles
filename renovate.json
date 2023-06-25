@@ -20,7 +20,8 @@
         },
         {
             "fileMatch": [
-                "^\\.github\\/workflows\\/docker\\.yml$"
+                "^\\.github\\/workflows\\/docker\\.yml$",
+                "^\\.github\\/workflows\\/ci\\.yml$"
             ],
             "matchStrings": [
                 "\\s*ALPINE_IMAGE: alpine:(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)\\s*"
