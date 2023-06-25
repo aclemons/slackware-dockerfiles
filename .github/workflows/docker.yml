@@ -7,9 +7,13 @@ name: Slackware Docker Images
   push:
     branches:
       - 'master'
+  pull_request:
+    branches:
+      - 'master'
 
 concurrency:
-  group: docker-master
+  group: ${{ github.head_ref || github.ref_name }} 
+  cancel-in-progress: true
 
 env:
   ALPINE_IMAGE: alpine:3.18.2@sha256:82d1e9d7ed48a7523bdebc18cf6290bdb97b82302a8a9c27d4fe885949ea94d1
@@ -59,6 +63,7 @@ jobs:
 
       - name: Cache Base Tarballs
         id: cache-base-tarballs
+        if: github.event_name != 'pull_request'
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: base_tarballs/
@@ -72,6 +77,7 @@ jobs:
         uses: docker/setup-buildx-action@ecf95283f03858871ff00b787d79c419715afc34 # v2.7.0
 
       - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           registry: ghcr.io
@@ -79,13 +85,14 @@ jobs:
           password: ${{ github.token }}
 
       - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build slackware tarball
-        if: steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true'
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware" -e ARCH="i586" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -95,7 +102,7 @@ jobs:
           cp slackware-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackware64 tarball
-        if: steps.cache-base-tarballs.outputs.cache-hit != 'true' && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS), matrix.version)
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware64" -e ARCH="x86_64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -105,7 +112,7 @@ jobs:
           cp slackware64-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build armedslack tarball
-        if: steps.cache-base-tarballs.outputs.cache-hit != 'true' && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="armedslack" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -116,7 +123,7 @@ jobs:
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackwarearm tarball
-        if: steps.cache-base-tarballs.outputs.cache-hit != 'true' && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
         run: |
           docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwarearm" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -126,7 +133,7 @@ jobs:
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackwareaarch64 tarball
-        if: steps.cache-base-tarballs.outputs.cache-hit != 'true' && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS), matrix.version)
         run: |
           docker run --privileged --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwareaarch64" -e ARCH="aarch64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -136,7 +143,7 @@ jobs:
           cp slackwareaarch64-${{ matrix.version }}.tar base_tarballs/
 
       - name: Restore prerequisites
-        if: steps.cache-base-tarballs.outputs.cache-hit == 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit == 'true'
         run: |
           cp base_tarballs/*tar .
 
@@ -145,13 +152,13 @@ jobs:
           VERSION="${{ matrix.version }}" ./.github/workflows/bin/configure_docker_platforms.sh
 
       - name: Set latest tags
-        if: matrix.version == env.LATEST_VERSION
+        if: matrix.version == env.LATEST_VERSION && github.event_name != 'pull_request'
         run: |
           printf "GITHUB_LATEST_TAG=%s\n" "ghcr.io/${{ github.repository_owner }}/slackware:latest" >> $GITHUB_ENV
           printf "DOCKERHUB_LATEST_TAG=%s\n" "${{ github.repository_owner }}/slackware:latest" >> $GITHUB_ENV
 
       - name: Build and push
-        if: steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
         uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4.1.1
         with:
           push: true
@@ -167,3 +174,17 @@ jobs:
             ${{ github.repository_owner }}/slackware:${{ matrix.version }}
             ${{ env.GITHUB_LATEST_TAG }}
             ${{ env.DOCKERHUB_LATEST_TAG }}
+
+      - name: Build and test docker
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4.1.1
+        with:
+          push: false
+          load: false
+          platforms: ${{ env.docker_platforms }}
+          context: .
+          file: Dockerfile
+          build-args: |
+            VERSION=${{ matrix.version }}
+          tags: |
+            ${{ github.repository_owner }}/slackware:${{ matrix.version }}
