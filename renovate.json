@@ -29,5 +29,8 @@
             "depNameTemplate": "alpine",
             "datasourceTemplate": "docker"
         }
-    ]
+    ],
+    "docker": {
+        "pinDigests": true
+    }
 }
