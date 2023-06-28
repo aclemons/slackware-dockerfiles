@@ -6,7 +6,7 @@ ARG mirror_base
 RUN bash /install_all.sh "$mirror_base" && rm /install_all.sh
 
 
-FROM aclemons/slackware:15.0@sha256:bfead2e71b801bdf9f97e3430d5f754d43a324709385e5d35acb0f2a10564c23 as full_150
+FROM aclemons/slackware:15.0@sha256:af1b10b5259ca43a5f84d9a0245a79b75fde7667cce29a7ebdaf63aa0467ebc1 as full_150
 
 COPY scripts/install_all.sh /
 
