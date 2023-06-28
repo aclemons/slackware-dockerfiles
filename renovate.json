@@ -2,7 +2,9 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:base",
-        "helpers:pinGitHubActionDigests"
+        "helpers:pinGitHubActionDigests",
+        "regexManagers:githubActionsVersions",
+        "group:allNonMajor"
     ],
     "regexManagers": [
         {
@@ -18,17 +20,6 @@
             "datasourceTemplate": "github-releases",
             "versioningTemplate": "docker"
         },
-        {
-            "fileMatch": [
-                "^\\.github\\/workflows\\/docker\\.yml$",
-                "^\\.github\\/workflows\\/ci\\.yml$"
-            ],
-            "matchStrings": [
-                "\\s*ALPINE_IMAGE: alpine:(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)\\s*"
-            ],
-            "depNameTemplate": "alpine",
-            "datasourceTemplate": "docker"
-        }
     ],
     "docker": {
         "pinDigests": true
