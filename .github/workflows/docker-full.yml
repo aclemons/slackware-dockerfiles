@@ -9,6 +9,10 @@ name: Slackware 15.0 Full Docker Image
     #   - 'full/15.0/**/*'
     #   - 'scripts/install_all.sh'
 
+concurrency:
+  group: docker-full-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
 env:
   REGISTRY_IMAGE: aclemons/slackware
   # renovate: datasource=docker depName=nginx
@@ -92,7 +96,7 @@ jobs:
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
           network: host
           build-args: |
-            "mirror_base=http://localhost:3000"
+            mirror_base=http://localhost:3000
       -
         name: Export digest
         run: |
