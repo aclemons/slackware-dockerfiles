@@ -5,9 +5,9 @@ name: Slackware 15.0 Full Docker Image
   push:
     branches:
       - "master"
-    # paths:
-    #   - 'full/15.0/**/*'
-    #   - 'scripts/install_all.sh'
+    paths:
+      - 'full/15.0/**/*'
+      - 'scripts/install_all.sh'
 
 concurrency:
   group: docker-full-${{ github.head_ref || github.ref_name }}
