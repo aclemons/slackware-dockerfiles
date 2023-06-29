@@ -23,6 +23,7 @@ env:
   SLACKWAREAARCH64_VERSIONS: '["current"]'
   PRE_SLACKWARE64_VERSIONS: '["8.1","9.0","9.1","10.0","10.1","10.2","11.0","12.0","12.1","12.2"]'
   LATEST_VERSION: '15.0'
+  REGISTRY_IMAGE: ${{ github.repository_owner }}/slackware
 
 jobs:
   docker:
@@ -151,11 +152,16 @@ jobs:
         run: |
           VERSION="${{ matrix.version }}" ./.github/workflows/bin/configure_docker_platforms.sh
 
-      - name: Set latest tags
-        if: matrix.version == env.LATEST_VERSION && github.event_name != 'pull_request'
-        run: |
-          printf "GITHUB_LATEST_TAG=%s\n" "ghcr.io/${{ github.repository_owner }}/slackware:latest" >> $GITHUB_ENV
-          printf "DOCKERHUB_LATEST_TAG=%s\n" "${{ github.repository_owner }}/slackware:latest" >> $GITHUB_ENV
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175 # v4.6.0
+        with:
+          images: |
+            ${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=${{ matrix.version }}
+            type=raw,value=latest,enable=${{ matrix.version == env.LATEST_VERSION }}
 
       - name: Build and push
         if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
@@ -169,11 +175,8 @@ jobs:
           file: Dockerfile
           build-args: |
             VERSION=${{ matrix.version }}
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/slackware:${{ matrix.version }}
-            ${{ github.repository_owner }}/slackware:${{ matrix.version }}
-            ${{ env.GITHUB_LATEST_TAG }}
-            ${{ env.DOCKERHUB_LATEST_TAG }}
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build and test docker
         if: github.event_name == 'pull_request'
@@ -186,5 +189,5 @@ jobs:
           file: Dockerfile
           build-args: |
             VERSION=${{ matrix.version }}
-          tags: |
-            ${{ github.repository_owner }}/slackware:${{ matrix.version }}
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
