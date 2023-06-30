@@ -10,7 +10,7 @@ name: Slackware 15.0 Full Docker Image
       - 'scripts/install_all.sh'
 
 concurrency:
-  group: docker-full-${{ github.head_ref || github.ref_name }}
+  group: docker-full-15.0-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: false
 
 env:
