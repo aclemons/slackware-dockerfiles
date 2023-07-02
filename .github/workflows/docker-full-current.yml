@@ -2,6 +2,7 @@
 name: Slackware -current Full Docker Image
 
 "on":
+  workflow_dispatch: ~
   push:
     branches:
       - "master"
