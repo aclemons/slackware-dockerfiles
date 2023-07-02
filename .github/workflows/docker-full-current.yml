@@ -31,6 +31,9 @@ jobs:
           - linux/arm64/v8
     steps:
       -
+        name: Maximise disc space
+        uses: easimon/maximize-build-space@67afc2d7662c9d296547435e7605cc57a1df46f3 # v7
+      -
         name: Checkout
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       -
