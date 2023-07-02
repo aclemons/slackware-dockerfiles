@@ -19,7 +19,7 @@ env:
   NGINX_IMAGE_VERSION: 1.25.1-alpine3.17-slim@sha256:4b66d0cb3c4d314ed566b1d3ba0b95b9cfbb7b811cbbd54dda6e432a8fe0d7e4
 
 jobs:
-  build:
+  build-current:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -111,10 +111,10 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  merge:
+  merge-current:
     runs-on: ubuntu-22.04
     needs:
-      - build
+      - build-current
     steps:
       -
         name: Download digests
