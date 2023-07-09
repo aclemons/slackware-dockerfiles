@@ -31,6 +31,8 @@ jobs:
       matrix:
         version: ['8.1', '9.0', '9.1', '10.0', '10.1', '10.2', '11.0', '12.0', '12.1', '12.2', '13.0', '13.1', '13.37', '14.0', '14.1', '14.2', '15.0', 'current']
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 

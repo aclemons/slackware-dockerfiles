@@ -22,6 +22,8 @@ env:
 jobs:
   build-current:
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -126,6 +128,8 @@ jobs:
 
   merge-current:
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     needs:
       - build-current
     steps:
