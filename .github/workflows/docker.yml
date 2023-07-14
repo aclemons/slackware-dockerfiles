@@ -117,7 +117,14 @@ jobs:
       - name: Build armedslack tarball
         if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
         run: |
+          CHECKSUMS="yes"
+
+          if [ "${{ matrix.version }}" = "13.1" ] ; then
+            CHECKSUMS="yes-no-checksums-gpg"
+          fi
+
           docker run --privileged --security-opt apparmor:unconfined --rm \
+            -e CHECKSUMS="$CHECKSUMS" \
             -e RELEASENAME="armedslack" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
             sh /scripts/build_base_image.sh
@@ -128,7 +135,14 @@ jobs:
       - name: Build slackwarearm tarball
         if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
         run: |
+          CHECKSUMS="yes"
+
+          if [ "${{ matrix.version }}" = "14.1" ] ; then
+            CHECKSUMS="yes-no-checksums-gpg"
+          fi
+
           docker run --privileged --security-opt apparmor:unconfined --rm \
+            -e CHECKSUMS="$CHECKSUMS" \
             -e RELEASENAME="slackwarearm" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
             sh /scripts/build_base_image.sh
