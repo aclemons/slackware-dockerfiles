@@ -33,6 +33,18 @@ jobs:
           - linux/arm/v7
     steps:
       -
+        name: Maximise disc space
+        run: |
+          df -h
+          printf '\n'
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          printf '\n'
+          df -h
+      -
         name: Checkout
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       -
