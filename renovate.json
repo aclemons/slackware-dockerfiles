@@ -6,20 +6,27 @@
         "regexManagers:githubActionsVersions",
         "group:allNonMajor"
     ],
+    "packageRules": [
+        {
+            "matchDepNames": "ubuntu gha runner",
+            "extractVersion": "^ubuntu(?<version>\\d\\d).*?$"
+        }
+    ],
     "regexManagers": [
         {
             "fileMatch": [
-                "^(workflow-templates|\\.github\\/workflows)\\/[^/]+\\.[Yy][Aa]?[Mm][Ll]$",
-                "(^|\\/)action\\.[Yy][Aa]?[Mm][Ll]$"
+                "^.github/(?:workflows|actions)/.+\\.ya?ml$"
             ],
             "matchStrings": [
-                "ubuntu-(?<currentValue>\\d\\d)\\.04"
+                "ubuntu-(?<currentValue>\\d\\d|latest)(\\.\\d\\d)?"
             ],
-            "depNameTemplate": "github actions runner ubuntu",
+            "depNameTemplate": "ubuntu gha runner",
             "packageNameTemplate": "actions/runner-images",
             "datasourceTemplate": "github-releases",
-            "versioningTemplate": "docker"
-        },
+            "versioningTemplate": "loose",
+            "currentValueTemplate": "{{{replace 'latest' '16' currentValue}}}",
+            "autoReplaceStringTemplate": "ubuntu-{{{newValue}}}.04"
+        }
     ],
     "docker": {
         "pinDigests": true
