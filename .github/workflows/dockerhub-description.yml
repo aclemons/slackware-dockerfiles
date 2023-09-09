@@ -1,7 +1,7 @@
 ---
 name: Update Docker Hub Description
 
-"on":
+on:
   push:
     branches:
       - master

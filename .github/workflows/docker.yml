@@ -1,15 +1,15 @@
 ---
 name: Slackware Docker Images
 
-"on":
+on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: 0 3 * * *
   push:
     branches:
-      - 'master'
+      - master
   pull_request:
     branches:
-      - 'master'
+      - master
 
 concurrency:
   group: docker-${{ github.head_ref || github.ref_name }}
@@ -29,7 +29,8 @@ jobs:
   docker:
     strategy:
       matrix:
-        version: ['8.1', '9.0', '9.1', '10.0', '10.1', '10.2', '11.0', '12.0', '12.1', '12.2', '13.0', '13.1', '13.37', '14.0', '14.1', '14.2', '15.0', 'current']
+        version: ['8.1', '9.0', '9.1', '10.0', '10.1', '10.2', '11.0', '12.0', '12.1', '12.2', '13.0', '13.1', '13.37', '14.0', '14.1', '14.2', '15.0',
+          current]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -107,7 +108,8 @@ jobs:
           cp slackware-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackware64 tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS),
+          matrix.version)
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware64" -e ARCH="x86_64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -117,7 +119,8 @@ jobs:
           cp slackware64-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build armedslack tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.ARMEDSLACK_VERSIONS),
+          matrix.version)
         run: |
           CHECKSUMS="yes"
 
@@ -135,7 +138,8 @@ jobs:
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackwarearm tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREARM_VERSIONS),
+          matrix.version)
         run: |
           CHECKSUMS="yes"
 
@@ -147,12 +151,13 @@ jobs:
             -e CHECKSUMS="$CHECKSUMS" \
             -e RELEASENAME="slackwarearm" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
-            sh /scripts/build_base_image.sh
+            ./scripts/build_base_image.sh
 
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackwareaarch64 tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS), matrix.version)
+        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS),
+          matrix.version)
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwareaarch64" -e ARCH="aarch64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
