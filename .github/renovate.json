@@ -1,34 +1,19 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
-        "config:base",
-        "helpers:pinGitHubActionDigests",
-        "regexManagers:githubActionsVersions",
-        "group:allNonMajor"
-    ],
-    "packageRules": [
-        {
-            "matchDepNames": "ubuntu gha runner",
-            "extractVersion": "^ubuntu(?<version>\\d\\d).*?$"
-        }
-    ],
-    "regexManagers": [
-        {
-            "fileMatch": [
-                "^.github/(?:workflows|actions)/.+\\.ya?ml$"
-            ],
-            "matchStrings": [
-                "ubuntu-(?<currentValue>\\d\\d|latest)(\\.\\d\\d)?"
-            ],
-            "depNameTemplate": "ubuntu gha runner",
-            "packageNameTemplate": "actions/runner-images",
-            "datasourceTemplate": "github-releases",
-            "versioningTemplate": "loose",
-            "currentValueTemplate": "{{{replace 'latest' '16' currentValue}}}",
-            "autoReplaceStringTemplate": "ubuntu-{{{newValue}}}.04"
-        }
-    ],
-    "docker": {
-        "pinDigests": true
-    }
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":maintainLockFilesMonthly",
+    ":separateMajorReleases",
+    ":separateMultipleMajorReleases",
+    ":separatePatchReleases",
+    "regexManagers:dockerfileVersions",
+    "regexManagers:githubActionsVersions",
+    "schedule:earlyMondays"
+  ],
+  "ignoreTests": false,
+  "pre-commit": {
+    "enabled": true
+  },
+  "rangeStrategy": "pin",
+  "timezone": "Asia/Tokyo"
 }
