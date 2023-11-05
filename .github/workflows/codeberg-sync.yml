@@ -1,0 +1,19 @@
+---
+name: Mirror Sync
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  codeberg:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+          show-progress: false
+
+      - name: Mirror to codeberg
+        run: |
+          git remote add mirror "https://${{ github.repository_owner }}:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/${{ github.repository }}.git"
+          git push --tags --force --prune mirror "refs/remotes/origin/*:refs/heads/*"
+          git remote remove mirror
