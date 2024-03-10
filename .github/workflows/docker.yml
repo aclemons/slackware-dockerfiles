@@ -17,7 +17,7 @@ concurrency:
 
 env:
   # renovate: datasource=docker depName=alpine versioning=docker
-  ALPINE_IMAGE_VERSION: 3.18.2@sha256:82d1e9d7ed48a7523bdebc18cf6290bdb97b82302a8a9c27d4fe885949ea94d1
+  ALPINE_IMAGE: alpine:3.18.2@sha256:82d1e9d7ed48a7523bdebc18cf6290bdb97b82302a8a9c27d4fe885949ea94d1
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
   SLACKWAREARM_VERSIONS: '["14.0","14.1","14.2","15.0"]'
   SLACKWAREAARCH64_VERSIONS: '["current"]'
@@ -102,7 +102,7 @@ jobs:
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware" -e ARCH="i586" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
-            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
+            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
 
           cp slackware-${{ matrix.version }}.tar base_tarballs/
@@ -113,7 +113,7 @@ jobs:
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware64" -e ARCH="x86_64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
-            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
+            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
 
           cp slackware64-${{ matrix.version }}.tar base_tarballs/
@@ -131,7 +131,7 @@ jobs:
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e CHECKSUMS="$CHECKSUMS" \
             -e RELEASENAME="armedslack" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
-            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
+            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
 
           mv armedslack-${{ matrix.version }}.tar slackwarearm-${{ matrix.version }}.tar
@@ -150,7 +150,7 @@ jobs:
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e CHECKSUMS="$CHECKSUMS" \
             -e RELEASENAME="slackwarearm" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
-            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
+            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             ./scripts/build_base_image.sh
 
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
@@ -161,7 +161,7 @@ jobs:
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwareaarch64" -e ARCH="aarch64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
-            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE_VERSION }} \
+            -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" ${{ env.ALPINE_IMAGE }} \
             sh /scripts/build_base_image.sh
 
           cp slackwareaarch64-${{ matrix.version }}.tar base_tarballs/

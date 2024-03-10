@@ -15,5 +15,14 @@
     "enabled": true
   },
   "rangeStrategy": "pin",
-  "timezone": "Asia/Tokyo"
+  "timezone": "Asia/Tokyo",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^\\.github\\/workflows\\/docker\\.yml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+ALPINE_IMAGE\\s*:\\s*[\"']?alpine:(?<currentValue>.+?)@(?<currentDigest>sha256:[a-f0-9]+)[\"']?\\s"
+      ]
+    }
+  ]
 }
