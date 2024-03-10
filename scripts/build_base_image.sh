@@ -40,7 +40,7 @@ cd /tmp
 
 git clone https://github.com/aclemons/slackware-container.git
 cd slackware-container
-git checkout 9feef4274c1c56aa7dbfd0c1e854611ae71bc50d
+git checkout 1edb5cd881b4e0f4d29f59ae879efd17a3e06526
 
 RELEASENAME=${RELEASENAME:-}
 ARCH=${ARCH:-}
