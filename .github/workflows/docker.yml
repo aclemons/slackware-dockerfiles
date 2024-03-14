@@ -17,7 +17,7 @@ concurrency:
 
 env:
   # renovate: datasource=docker depName=alpine versioning=docker
-  ALPINE_IMAGE: alpine:3.18.2@sha256:82d1e9d7ed48a7523bdebc18cf6290bdb97b82302a8a9c27d4fe885949ea94d1
+  ALPINE_IMAGE: alpine:3.18.6@sha256:11e21d7b981a59554b3f822c49f6e9f57b6068bb74f49c4cd5cc4c663c7e5160
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
   SLACKWAREARM_VERSIONS: '["14.0","14.1","14.2","15.0"]'
   SLACKWAREAARCH64_VERSIONS: '["current"]'
