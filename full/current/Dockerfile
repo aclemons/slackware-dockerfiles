@@ -1,4 +1,4 @@
-FROM aclemons/slackware:current@sha256:da013f2d89d02c3e21c5845b05cd0b8bc124ab6a8334c99c040741d794097899
+FROM aclemons/slackware:current@sha256:24607e7b166e874746b231a86f85cccb43a3cc030516effbf3d5b8784a8331f1
 
 COPY scripts/install_all.sh /
 
