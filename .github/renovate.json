@@ -17,8 +17,8 @@
     ":separateMajorReleases",
     ":separateMultipleMajorReleases",
     ":separatePatchReleases",
-    "regexManagers:dockerfileVersions",
-    "regexManagers:githubActionsVersions",
+    "customManagers:dockerfileVersions",
+    "customManagers:githubActionsVersions",
     "schedule:earlyMondays"
   ],
   "ignoreTests": false,
