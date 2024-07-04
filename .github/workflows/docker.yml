@@ -77,7 +77,7 @@ jobs:
           key: ${{ runner.os }}-base-tarballs-${{ matrix.version }}-${{ hashFiles('**/changelogs/ChangeLog*', '**/scripts/build_base_image.sh') }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+        uses: docker/setup-qemu-action@5927c834f5b4fdf503fca6f4c7eccda82949e1ee # v3.1.0
 
       - name: Set up Docker Buildx
         id: buildx
