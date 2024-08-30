@@ -17,7 +17,7 @@ concurrency:
 env:
   REGISTRY_IMAGE: aclemons/slackware
   # renovate: datasource=docker depName=nginx versioning=loose
-  NGINX_IMAGE_VERSION: 1.25.1-alpine3.17-slim@sha256:4b66d0cb3c4d314ed566b1d3ba0b95b9cfbb7b811cbbd54dda6e432a8fe0d7e4
+  NGINX_IMAGE_VERSION: 1.27.1
 
 jobs:
   build-stable:
