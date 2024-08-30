@@ -1,16 +1,16 @@
-FROM scratch as slackware-386
+FROM scratch AS slackware-386
 ARG VERSION
 ADD slackware-$VERSION.tar /
 
-FROM scratch as slackware-amd64
+FROM scratch AS slackware-amd64
 ARG VERSION
 ADD slackware64-$VERSION.tar /
 
-FROM scratch as slackware-arm
+FROM scratch AS slackware-arm
 ARG VERSION
 ADD slackwarearm-$VERSION.tar /
 
-FROM scratch as slackware-arm64
+FROM scratch AS slackware-arm64
 ARG VERSION
 ADD slackwareaarch64-$VERSION.tar /
 
