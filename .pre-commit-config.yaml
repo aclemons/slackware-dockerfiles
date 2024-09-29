@@ -31,6 +31,6 @@ repos:
       - id: hadolint-docker
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.1
+    rev: v1.7.3
     hooks:
       - id: actionlint-docker
