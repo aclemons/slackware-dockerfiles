@@ -11,6 +11,14 @@
     "schedule:earlyMondays"
   ],
   "ignoreTests": false,
+  "packageRules": [
+    {
+      "matchCategories": [
+        "docker"
+      ],
+      "pinDigests": true
+    }
+  ],
   "pre-commit": {
     "enabled": true
   },
