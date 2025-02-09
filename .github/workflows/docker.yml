@@ -20,7 +20,7 @@ env:
   # renovate: datasource=docker depName=alpine versioning=docker
   ALPINE_IMAGE: alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcffe38ed51099
   # renovate: datasource=docker depName=tonistiigi/binfmt versioning=docker
-  BINFMT_IMAGE: tonistiigi/binfmt:qemu-v9.2.0@sha256:2ebbaaeb812b8f9d1cd725d2640a25989b2c25506f3665411a92554746f68562
+  BINFMT_VERSION: tonistiigi/binfmt:qemu-v9.2.0@sha256:2ebbaaeb812b8f9d1cd725d2640a25989b2c25506f3665411a92554746f68562
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
   SLACKWAREARM_VERSIONS: '["14.0","14.1","14.2","15.0"]'
   SLACKWAREAARCH64_VERSIONS: '["current"]'
@@ -81,7 +81,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3.3.0
         with:
-          image: ${{ env.BINFMT_IMAGE }}
+          image: tonistiigi/binfmt:${{ env.BINFMT_VERSION }}
 
       - name: Set up Docker Buildx
         id: buildx
