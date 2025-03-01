@@ -73,7 +73,7 @@ jobs:
       - name: Cache Base Tarballs
         id: cache-base-tarballs
         if: github.event_name != 'pull_request'
-        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: base_tarballs/
           key: ${{ runner.os }}-base-tarballs-${{ matrix.version }}-${{ hashFiles('**/changelogs/ChangeLog*', '**/scripts/build_base_image.sh') }}
