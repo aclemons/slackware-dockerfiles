@@ -18,7 +18,7 @@ concurrency:
 
 env:
   # renovate: datasource=docker depName=alpine versioning=loose
-  ALPINE_IMAGE: 3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+  ALPINE_IMAGE: 3.22.0@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715
   # renovate: datasource=docker depName=tonistiigi/binfmt versioning=loose
   BINFMT_IMAGE: qemu-v9.2.0@sha256:ea2f0dd74e74f101df59f9a6b31d0960994060c7982a921cbceecee0f1841125
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
