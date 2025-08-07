@@ -20,7 +20,7 @@ repos:
         args: [--mapping, '2', --sequence, '4', --offset, '2', --width, '150']
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
         args: [-x]
