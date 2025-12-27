@@ -11,6 +11,7 @@ jobs:
         with:
           fetch-depth: 0
           show-progress: false
+          persist-credentials: false
 
       - name: Mirror to codeberg
         run: |
