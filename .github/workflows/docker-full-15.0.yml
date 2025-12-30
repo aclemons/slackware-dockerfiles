@@ -36,15 +36,23 @@ jobs:
     steps:
       - name: Maximise disc space
         run: |
-          df -h
-          printf '\n'
+          printf 'Space before cleanup: %s\n' "$(df -h)"
+
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/bin/stack
+
           sudo docker image prune --all --force
-          printf '\n'
-          df -h
+
+          sudo apt-get clean
+
+          printf 'Space after cleanup: %s\n' "$(df -h)"
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
