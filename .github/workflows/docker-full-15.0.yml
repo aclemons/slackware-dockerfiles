@@ -17,7 +17,7 @@ concurrency:
 env:
   REGISTRY_IMAGE: aclemons/slackware
   # renovate: datasource=docker depName=nginx versioning=docker
-  NGINX_IMAGE: 1.29.4@sha256:ca871a86d45a3ec6864dc45f014b11fe626145569ef0e74deaffc95a3b15b430
+  NGINX_IMAGE: 1.29.4@sha256:7272239bd21472f311aa3e86a85fdca0f1ad648995f983ab6e5e7dea665cd233
   # renovate: datasource=docker depName=tonistiigi/binfmt versioning=loose
   BINFMT_IMAGE: qemu-v9.2.0@sha256:ea2f0dd74e74f101df59f9a6b31d0960994060c7982a921cbceecee0f1841125
 
