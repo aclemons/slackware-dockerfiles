@@ -185,7 +185,7 @@ jobs:
 
       - name: Build and push
         if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
           push: true
           platforms: ${{ env.docker_platforms }}
@@ -200,7 +200,7 @@ jobs:
 
       - name: Build and test docker
         if: github.event_name == 'pull_request'
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
           push: false
           load: false
