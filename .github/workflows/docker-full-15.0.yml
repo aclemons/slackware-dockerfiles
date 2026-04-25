@@ -18,7 +18,7 @@ env:
   # renovate: datasource=docker depName=nginx versioning=docker
   NGINX_IMAGE: 1.30.0@sha256:0c3a604353135ac13f3a991e2a98c9958af7b8c0b7251ce1590e0c5ff5e3692c
   # renovate: datasource=docker depName=tonistiigi/binfmt versioning=loose
-  BINFMT_IMAGE: qemu-v9.2.0@sha256:ea2f0dd74e74f101df59f9a6b31d0960994060c7982a921cbceecee0f1841125
+  BINFMT_IMAGE: qemu-v10.2.1-65@sha256:d3b963f787999e6c0219a48dba02978769286ff61a5f4d26245cb6a6e5567ea3
 
 jobs:
   build-stable:
