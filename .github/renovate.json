@@ -23,6 +23,14 @@
     "schedule:earlyMondays"
   ],
   "ignoreTests": false,
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "tonistiigi/binfmt"
+      ],
+      "versioning": "regex:^qemu-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<build>\\d+))?$"
+    }
+  ],
   "pre-commit": {
     "enabled": true
   },
