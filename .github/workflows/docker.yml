@@ -144,7 +144,7 @@ jobs:
             -e CHECKSUMS="$CHECKSUMS" \
             -e RELEASENAME="slackwarearm" -e ARCH="arm" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
             -v "$(pwd):/data" -v "$(pwd)/scripts:/scripts" alpine:${{ env.ALPINE_IMAGE }} \
-            ./scripts/build_base_image.sh
+            sh /scripts/build_base_image.sh
 
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
@@ -163,6 +163,33 @@ jobs:
         run: |
           cp base_tarballs/*tar .
 
+      - name: Compute packages hash
+        id: compute-packages-hash
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        run: |
+          set -o pipefail
+          hash_input=""
+          for tarball in slackware-${{ matrix.version }}.tar slackware64-${{ matrix.version }}.tar slackwarearm-${{ matrix.version }}.tar slackwareaarch64-${{ matrix.version }}.tar ; do
+            [ -f "$tarball" ] || continue
+            manifests=$(tar -tf "$tarball" | grep -E '\./var/(log|lib/pkgtools)/packages/.')
+            if [ -z "$manifests" ] ; then
+              printf 'No package manifests found in %s\n' "$tarball" 1>&2
+              exit 1
+            fi
+            arch_hash=$(printf '%s\n' "$manifests" | sed 's|.*/||' | sort | sha256sum | cut -d' ' -f1)
+            hash_input="${hash_input}${tarball}:${arch_hash}\n"
+          done
+          packages_hash=$(printf '%b' "$hash_input" | sha256sum | cut -d' ' -f1)
+          printf 'packages_hash=%s\n' "$packages_hash" >> "$GITHUB_OUTPUT"
+
+      - name: Check if packages changed since last push
+        id: packages-pushed-cache
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .packages-pushed-sentinel
+          key: ${{ runner.os }}-packages-pushed-${{ matrix.version }}-${{ steps.compute-packages-hash.outputs.packages_hash }}
+
       - name: Compute docker platforms
         run: |
           VERSION="${{ matrix.version }}" ./.github/workflows/bin/configure_docker_platforms.sh
@@ -178,7 +205,7 @@ jobs:
             type=raw,value=latest,enable=${{ matrix.version == env.LATEST_VERSION }}
 
       - name: Build and push
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true' && steps.packages-pushed-cache.outputs.cache-hit != 'true'
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           push: true
@@ -191,6 +218,10 @@ jobs:
             VERSION=${{ matrix.version }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Mark packages as pushed
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true' && steps.packages-pushed-cache.outputs.cache-hit != 'true'
+        run: echo "pushed" > .packages-pushed-sentinel
 
       - name: Build and test docker
         if: github.event_name == 'pull_request'
