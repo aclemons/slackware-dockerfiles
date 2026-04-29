@@ -81,6 +81,7 @@ jobs:
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
         with:
           image: tonistiigi/binfmt:${{ env.BINFMT_IMAGE }}
+          cache-image: false
 
       - name: Set up Docker Buildx
         id: buildx
@@ -210,8 +211,6 @@ jobs:
         with:
           push: true
           platforms: ${{ env.docker_platforms }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           context: .
           file: Dockerfile
           build-args: |
