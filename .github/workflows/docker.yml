@@ -70,8 +70,16 @@ jobs:
         run: |
           curl -s -f -o changelogs/ChangeLog.txt.arm https://slackware.uk/slackwarearm/slackwareaarch64-${{ matrix.version }}/ChangeLog.txt
 
-      - name: Cache Base Tarballs
+      - name: Restore Base Tarballs (PR)
         id: cache-base-tarballs
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: base_tarballs/
+          key: ${{ runner.os }}-base-tarballs-${{ matrix.version }}-${{ hashFiles('**/changelogs/ChangeLog*', '**/scripts/build_base_image.sh') }}
+
+      - name: Cache Base Tarballs
+        id: cache-base-tarballs-push
         if: github.event_name != 'pull_request'
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
@@ -79,11 +87,20 @@ jobs:
           key: ${{ runner.os }}-base-tarballs-${{ matrix.version }}-${{ hashFiles('**/changelogs/ChangeLog*', '**/scripts/build_base_image.sh') }}
 
       - name: Clear stale base tarball caches
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs-push.outputs.cache-hit != 'true'
         run: |
           gh cache list --repo "${{ github.repository }}" --limit 200 --ref refs/heads/master --key ${{ runner.os }}-base-tarballs-${{ matrix.version }} | cut -f 1 | parallel -I xx gh cache delete --repo "${{ github.repository }}" xx || true
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Determine base tarball cache state
+        id: cache-base-tarballs-state
+        run: |
+          if [ "${{ steps.cache-base-tarballs.outputs.cache-hit }}" = "true" ] || [ "${{ steps.cache-base-tarballs-push.outputs.cache-hit }}" = "true" ] ; then
+            printf 'cache-hit=true\n' >> "$GITHUB_OUTPUT"
+          else
+            printf 'cache-hit=false\n' >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
@@ -103,7 +120,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build slackware tarball
-        if: github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: steps.cache-base-tarballs-state.outputs.cache-hit != 'true'
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware" -e ARCH="i586" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -113,7 +130,7 @@ jobs:
           cp slackware-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackware64 tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS), matrix.version)
+        if: steps.cache-base-tarballs-state.outputs.cache-hit != 'true' && false == contains(fromJson(env.PRE_SLACKWARE64_VERSIONS), matrix.version)
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackware64" -e ARCH="x86_64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -123,7 +140,7 @@ jobs:
           cp slackware64-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build armedslack tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
+        if: steps.cache-base-tarballs-state.outputs.cache-hit != 'true' && contains(fromJson(env.ARMEDSLACK_VERSIONS), matrix.version)
         run: |
           CHECKSUMS="yes"
 
@@ -141,7 +158,7 @@ jobs:
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackwarearm tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
+        if: steps.cache-base-tarballs-state.outputs.cache-hit != 'true' && contains(fromJson(env.SLACKWAREARM_VERSIONS), matrix.version)
         run: |
           CHECKSUMS="yes"
 
@@ -158,7 +175,7 @@ jobs:
           cp slackwarearm-${{ matrix.version }}.tar base_tarballs/
 
       - name: Build slackwareaarch64 tarball
-        if: (github.event_name == 'pull_request' || steps.cache-base-tarballs.outputs.cache-hit != 'true') && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS), matrix.version)
+        if: steps.cache-base-tarballs-state.outputs.cache-hit != 'true' && contains(fromJson(env.SLACKWAREAARCH64_VERSIONS), matrix.version)
         run: |
           docker run --privileged --security-opt apparmor:unconfined --rm \
             -e RELEASENAME="slackwareaarch64" -e ARCH="aarch64" -e VERSION=${{ matrix.version }} -e CHOWN_TO="$(id -u):$(id -g)" \
@@ -168,13 +185,13 @@ jobs:
           cp slackwareaarch64-${{ matrix.version }}.tar base_tarballs/
 
       - name: Restore prerequisites
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit == 'true'
+        if: steps.cache-base-tarballs-state.outputs.cache-hit == 'true'
         run: |
           cp base_tarballs/*tar .
 
       - name: Compute packages hash
         id: compute-packages-hash
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs-state.outputs.cache-hit != 'true'
         run: |
           set -o pipefail
           hash_input=""
@@ -193,7 +210,7 @@ jobs:
 
       - name: Check if packages changed since last push
         id: packages-pushed-cache
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs-state.outputs.cache-hit != 'true'
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .packages-pushed-sentinel
@@ -214,7 +231,7 @@ jobs:
             type=raw,value=latest,enable=${{ matrix.version == env.LATEST_VERSION }}
 
       - name: Build and push
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true' && steps.packages-pushed-cache.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs-state.outputs.cache-hit != 'true' && steps.packages-pushed-cache.outputs.cache-hit != 'true'
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           push: true
@@ -227,7 +244,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Mark packages as pushed
-        if: github.event_name != 'pull_request' && steps.cache-base-tarballs.outputs.cache-hit != 'true' && steps.packages-pushed-cache.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.cache-base-tarballs-state.outputs.cache-hit != 'true' && steps.packages-pushed-cache.outputs.cache-hit != 'true'
         run: echo "pushed" > .packages-pushed-sentinel
 
       - name: Build and test docker
