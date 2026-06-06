@@ -32,6 +32,16 @@ jobs:
           - linux/386
           - linux/amd64
           - linux/arm/v7
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+        exclude:
+          - platform: linux/386
+            os: ubuntu-24.04-arm
+          - platform: linux/amd64
+            os: ubuntu-24.04-arm
+          - platform: linux/arm/v7
+            os: ubuntu-24.04
     steps:
       - name: Maximise disc space
         run: |
@@ -70,6 +80,7 @@ jobs:
             echo "Unhandled platform ${{ matrix.platform }}"
             exit 1
           fi
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
