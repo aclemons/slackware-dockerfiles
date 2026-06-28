@@ -73,7 +73,7 @@ jobs:
       - name: Restore Base Tarballs (PR)
         id: cache-base-tarballs
         if: github.event_name == 'pull_request'
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: base_tarballs/
           key: ${{ runner.os }}-base-tarballs-${{ matrix.version }}-${{ hashFiles('**/changelogs/ChangeLog*', '**/scripts/build_base_image.sh') }}
@@ -81,7 +81,7 @@ jobs:
       - name: Cache Base Tarballs
         id: cache-base-tarballs-push
         if: github.event_name != 'pull_request'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: base_tarballs/
           key: ${{ runner.os }}-base-tarballs-${{ matrix.version }}-${{ hashFiles('**/changelogs/ChangeLog*', '**/scripts/build_base_image.sh') }}
@@ -211,7 +211,7 @@ jobs:
       - name: Check if packages changed since last push
         id: packages-pushed-cache
         if: github.event_name != 'pull_request' && steps.cache-base-tarballs-state.outputs.cache-hit != 'true'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .packages-pushed-sentinel
           key: ${{ runner.os }}-packages-pushed-${{ matrix.version }}-${{ steps.compute-packages-hash.outputs.packages_hash }}
