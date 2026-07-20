@@ -18,8 +18,8 @@ concurrency:
 env:
   # renovate: datasource=docker depName=alpine versioning=loose
   ALPINE_IMAGE: 3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
-  # renovate: datasource=docker depName=tonistiigi/binfmt versioning=loose
-  BINFMT_IMAGE: qemu-v10.2.3-68@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
+  # renovate: datasource=github-releases depName=docker/buildx
+  BUILDX_VERSION: 'v0.35.0'
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
   SLACKWAREARM_VERSIONS: '["14.0","14.1","14.2","15.0"]'
   SLACKWAREAARCH64_VERSIONS: '["current"]'
@@ -102,15 +102,28 @@ jobs:
             printf 'cache-hit=false\n' >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Configure binfmt image
+        run: |
+          BINFMT_IMAGE="$(awk '/^FROM / {print $2}' binfmt/Dockerfile)"
+          printf "BINFMT_IMAGE=%s\n" "$BINFMT_IMAGE" >> "$GITHUB_ENV"
+
+      - name: Configure buildkit image
+        run: |
+          BUILDKIT_IMAGE="$(awk '/^FROM / {print $2}' buildkit/Dockerfile)"
+          printf "BUILDKIT_IMAGE=%s\n" "$BUILDKIT_IMAGE" >> "$GITHUB_ENV"
+
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.1.0
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
         with:
-          image: tonistiigi/binfmt:${{ env.BINFMT_IMAGE }}
+          image: ${{ env.BINFMT_IMAGE }}
           cache-image: false
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+        with:
+          version: ${{ env.BUILDX_VERSION }}
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
