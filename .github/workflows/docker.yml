@@ -19,7 +19,7 @@ env:
   # renovate: datasource=docker depName=alpine versioning=loose
   ALPINE_IMAGE: 3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
   # renovate: datasource=github-releases depName=docker/buildx
-  BUILDX_VERSION: 'v0.35.0'
+  BUILDX_VERSION: 'v0.36.1'
   ARMEDSLACK_VERSIONS: '["12.2","13.1","13.37"]'
   SLACKWAREARM_VERSIONS: '["14.0","14.1","14.2","15.0"]'
   SLACKWAREAARCH64_VERSIONS: '["current"]'
