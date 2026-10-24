@@ -18,7 +18,7 @@ env:
   # renovate: datasource=docker depName=nginx versioning=docker
   NGINX_IMAGE: 1.31.7@sha256:8632b3314d74c61f0e27f59055bab13f7793b988c94c090154d867bc29e0f39b
   # renovate: datasource=github-releases depName=docker/buildx
-  BUILDX_VERSION: 'v0.38.0'
+  BUILDX_VERSION: 'v0.38.1'
 
 jobs:
   build-stable:
