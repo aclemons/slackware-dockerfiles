@@ -16,7 +16,7 @@ concurrency:
 env:
   REGISTRY_IMAGE: aclemons/slackware
   # renovate: datasource=docker depName=nginx versioning=docker
-  NGINX_IMAGE: 1.31.8@sha256:6e67f8eaac94fc456588d4ff6c470d984841f5b5dc4279863d5cbe6ec5a60def
+  NGINX_IMAGE: 1.31.8@sha256:c4d1df1ca40ef8cf932f19853f00eb0f81ffe5becda1256365bbf0a057060ffb
   # renovate: datasource=github-releases depName=docker/buildx
   BUILDX_VERSION: 'v0.38.1'
 
